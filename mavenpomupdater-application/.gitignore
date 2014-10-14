@@ -1,0 +1,7 @@
+/target
+/.settings
+/.classpath
+**/.DS_Store
+/.project
+/dependency-reduced-pom.xml
+/.DS_Store
