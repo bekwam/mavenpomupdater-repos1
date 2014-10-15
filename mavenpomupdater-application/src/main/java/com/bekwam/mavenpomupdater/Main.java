@@ -1,5 +1,7 @@
 package com.bekwam.mavenpomupdater;
 
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -13,6 +15,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.StackPaneBuilder;
 import javafx.stage.Stage;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,13 +38,33 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
     	
+    	Application.Parameters params = getParameters();
+    	
+    	List<String> unnamedList = params.getUnnamed();
+    	
+    	String mpuFXML = "mavenpomupdater.fxml";
+    	String alertFXML = "alert.fxml";
+    	
+    	if( CollectionUtils.isNotEmpty(unnamedList) 
+    			&& StringUtils.equalsIgnoreCase(unnamedList.get(0), "hidpi") ) {
+    		if( log.isInfoEnabled() ) {
+    			log.info("running in Hi-DPI display mode");
+    		}
+        	mpuFXML = "mavenpomupdater-hidpi.fxml";
+        	alertFXML = "alert-hidpi.fxml";
+    	} else {
+    		if( log.isInfoEnabled() ) {
+    			log.info("running in normal display mode");
+    		}
+    	}
+    	
     	final StackPane sp = StackPaneBuilder.create().build();
     	
-    	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource("mavenpomupdater.fxml"));
+    	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource(mpuFXML));
     	Parent mainView = (Parent)mainViewLoader.load();
     	MainViewController mainViewController = mainViewLoader.getController();
     	
-    	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource("alert.fxml"));
+    	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource(alertFXML));
     	Parent alertView = (Parent)alertViewLoader.load();
     	
     	final AlertController alertController = alertViewLoader.getController();
