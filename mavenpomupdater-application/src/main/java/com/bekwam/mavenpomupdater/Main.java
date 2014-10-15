@@ -10,6 +10,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.StackPaneBuilder;
 import javafx.stage.Stage;
 
+/**
+ * Main entry point for MPU
+ * 
+ * @author carlwalker
+ * @since 1.1.0
+ */
 public class Main extends Application {
 
     @Override
@@ -19,7 +25,7 @@ public class Main extends Application {
     	
     	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource("mavenpomupdater.fxml"));
     	Parent mainView = (Parent)mainViewLoader.load();
-    	Controller mainViewController = mainViewLoader.getController();
+    	MainViewController mainViewController = mainViewLoader.getController();
     	
     	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource("alert.fxml"));
     	Parent alertView = (Parent)alertViewLoader.load();

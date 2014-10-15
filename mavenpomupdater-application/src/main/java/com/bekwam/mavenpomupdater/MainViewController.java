@@ -39,9 +39,15 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public class Controller {
+/**
+ * Controller to support the main screen of MPU
+ * 
+ * @author carlwalker
+ * @since 1.0.0
+ */
+public class MainViewController {
 
-	private Log log = LogFactory.getLog( Controller.class);
+	private Log log = LogFactory.getLog( MainViewController.class);
 	
 	@FXML
 	VBox vbox;
@@ -69,7 +75,7 @@ public class Controller {
 
     AlertController alertController;
     
-    public Controller() {
+    public MainViewController() {
     	
     	if( log.isDebugEnabled() ) {
     		log.debug("[CONTROLLER]");
@@ -129,7 +135,7 @@ public class Controller {
         	if( log.isDebugEnabled() ) {
         		log.debug("[SCAN] rootDir is empty");
         	}
-        	alertController.setNotificationDialog("Root Dir Is Empty", "A root dir must be specified in order to scan.");
+        	alertController.setNotificationDialog("Project Root Is Empty", "A root directory must be specified in order to scan.");
         	vbox.toBack();  // bring up the alert view
         	return;
         }
@@ -140,6 +146,15 @@ public class Controller {
 
         List<String> pomPaths = new ArrayList<String>();
         gatherPOMPaths( rootDir, pomPaths, ff );
+
+        if( CollectionUtils.isEmpty(pomPaths) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[SCAN] pomPaths is empty");
+        	}
+        	alertController.setNotificationDialog("No POMs Found", "No pom.xml files were found in the specified Project Root.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
 
         tblPOMS.getItems().clear();
         for( String path : pomPaths ) {
@@ -196,11 +211,26 @@ public class Controller {
 
     private void gatherPOMPaths(String rootDir, List<String> pomPaths, FilenameFilter ff) {
 
-        if( rootDir == null || rootDir.length() == 0 ) {
+        if( StringUtils.isEmpty(rootDir) ) {
+        	
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[GATHER] rootDir is empty");
+        	}
+        	
             return;
         }
 
         File rd = new File(rootDir);
+        
+        if( !rd.exists() ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[SCAN] rootDir does not exist");
+        	}
+        	alertController.setNotificationDialog("Project Root Does Not Exist", "The specified root directory '" + rootDir + "' does not exist.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
+
         if( rd.isFile() ) {
 
             if( rd.getName().equals("pom.xml") ) {
@@ -235,7 +265,7 @@ public class Controller {
         	if( log.isDebugEnabled() ) {
         		log.debug("[UPDATE] tblPOMS is empty");
         	}
-        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a root directory and press Scan.");
+        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a Project Root and press Scan.");
         	vbox.toBack();  // bring up the alert view
         	return;
         }
@@ -290,3 +320,4 @@ public class Controller {
         }
     }
 }
+

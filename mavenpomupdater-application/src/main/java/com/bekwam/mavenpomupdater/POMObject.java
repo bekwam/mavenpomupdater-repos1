@@ -3,7 +3,10 @@ package com.bekwam.mavenpomupdater;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
- * Created by carl_000 on 9/17/2014.
+ * Model object for a POM
+ * 
+ * @author carlwalker
+ * @since 1.1.0
  */
 public class POMObject {
 

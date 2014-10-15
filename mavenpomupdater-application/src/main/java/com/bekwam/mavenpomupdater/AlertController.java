@@ -9,6 +9,12 @@ import javafx.scene.layout.GridPane;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Controller for Alert View
+ * 
+ * @author carlwalker
+ * @since 1.1.0
+ */
 public class AlertController {
 
 	private Log log = LogFactory.getLog( AlertController.class );
