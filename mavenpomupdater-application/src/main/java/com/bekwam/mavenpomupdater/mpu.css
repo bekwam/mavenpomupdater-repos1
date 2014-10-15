@@ -1,0 +1,11 @@
+.main-view-pane {
+	-fx-background-color: #FFFFFF;
+}
+
+.alert-pane {
+	-fx-background-color: #FFFFFF;
+}
+
+.alert-background-pane {
+	-fx-background-color: rgba(64, 64, 64, 0.85);
+}

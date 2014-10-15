@@ -17,6 +17,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
@@ -31,6 +32,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -39,6 +42,9 @@ import org.w3c.dom.Node;
 public class Controller {
 
 	private Log log = LogFactory.getLog( Controller.class);
+	
+	@FXML
+	VBox vbox;
 	
     @FXML
     TextField tfRootDir;
@@ -61,6 +67,8 @@ public class Controller {
     @FXML
     TableColumn<POMObject, String> tcParentVersion;
 
+    AlertController alertController;
+    
     public Controller() {
     	
     	if( log.isDebugEnabled() ) {
@@ -117,6 +125,15 @@ public class Controller {
 
         String rootDir = tfRootDir.getText();
 
+        if( StringUtils.isEmpty(rootDir) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[SCAN] rootDir is empty");
+        	}
+        	alertController.setNotificationDialog("Root Dir Is Empty", "A root dir must be specified in order to scan.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
+        
         String filtersCSV = tfFilters.getText();
 
         CSVFilenameFilter ff = new CSVFilenameFilter(filtersCSV);
@@ -203,6 +220,25 @@ public class Controller {
     	if( log.isDebugEnabled() ) {
     		log.debug("[UPDATE]");
     	}
+
+    	String newVersion = tfNewVersion.getText();
+        if( StringUtils.isEmpty(newVersion) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] newVersion is empty");
+        	}
+        	alertController.setNotificationDialog("No Version Specified", "Please specify a version.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
+
+        if( CollectionUtils.isEmpty(tblPOMS.getItems()) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] tblPOMS is empty");
+        	}
+        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a root directory and press Scan.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
 
         for( POMObject p : tblPOMS.getItems() ) {
 
