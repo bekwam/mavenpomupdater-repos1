@@ -22,12 +22,13 @@ public class WarningCellFactory implements Callback<TableColumn<POMObject,String
 				if( !empty ) {
 						this.setText( arg0 );
 						POMObject pomObject = (POMObject) this.getTableRow().getItem();
-						if( pomObject.getParseError() ) {
+						if( pomObject != null && pomObject.getParseError() ) {
 							this.setTextFill(Color.RED);
 						} else {
 							this.setTextFill(Color.BLACK);
 						}
 				} else {
+					this.setText( null );  // clear from recycled obj
 					this.setTextFill(Color.BLACK);
 				}
 			}
