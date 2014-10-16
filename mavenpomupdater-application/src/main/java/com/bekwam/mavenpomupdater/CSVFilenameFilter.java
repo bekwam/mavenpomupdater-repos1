@@ -11,7 +11,8 @@ import java.util.Arrays;
  * 
  * String list parameter can contain regular expressions
  * 
- * Created by carl_000 on 9/17/2014.
+ * @author carl
+ * @since 1.1.0
  */
 public class CSVFilenameFilter implements FilenameFilter {
 

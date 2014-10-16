@@ -16,7 +16,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
@@ -31,14 +33,25 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public class Controller {
+/**
+ * Controller to support the main screen of MPU
+ * 
+ * @author carlwalker
+ * @since 1.0.0
+ */
+public class MainViewController {
 
-	private Log log = LogFactory.getLog( Controller.class);
+	private Log log = LogFactory.getLog( MainViewController.class);
+	
+	@FXML
+	VBox vbox;
 	
     @FXML
     TextField tfRootDir;
@@ -61,11 +74,17 @@ public class Controller {
     @FXML
     TableColumn<POMObject, String> tcParentVersion;
 
-    public Controller() {
+    AlertController alertController;
+    DocumentBuilderFactory factory;
+    
+    public MainViewController() {
     	
     	if( log.isDebugEnabled() ) {
     		log.debug("[CONTROLLER]");
     	}
+    	
+        factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(false);
     }
 
     @FXML
@@ -78,14 +97,29 @@ public class Controller {
         tcPath.setCellValueFactory(
                 new PropertyValueFactory<POMObject, String>("absPath")
         );
-
+        tcPath.setCellFactory(new WarningCellFactory());
+        
         tcVersion.setCellValueFactory(
                 new PropertyValueFactory<POMObject, String>("version")
         );
+        tcVersion.setCellFactory(new WarningCellFactory());
 
         tcParentVersion.setCellValueFactory(
                new PropertyValueFactory<POMObject, String>("parentVersion")
         );
+        tcParentVersion.setCellFactory(new WarningCellFactory());
+
+        Tooltip rdTooltip = new Tooltip();
+        rdTooltip.setText("Recursively search directory for POMs");
+        tfRootDir.setTooltip(rdTooltip);
+        
+        Tooltip fTooltip = new Tooltip();
+        fTooltip.setText("Comma-separated list of filter strings");
+        tfFilters.setTooltip(fTooltip);
+        
+        Tooltip nvTooltip = new Tooltip();
+        nvTooltip.setText("Value to update POM parent version and version");
+        tfNewVersion.setTooltip(nvTooltip);
     }
 
     @FXML
@@ -117,12 +151,30 @@ public class Controller {
 
         String rootDir = tfRootDir.getText();
 
+        if( StringUtils.isEmpty(rootDir) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[SCAN] rootDir is empty");
+        	}
+        	alertController.setNotificationDialog("Project Root Is Empty", "A root directory must be specified in order to scan.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
+        
         String filtersCSV = tfFilters.getText();
 
         CSVFilenameFilter ff = new CSVFilenameFilter(filtersCSV);
 
         List<String> pomPaths = new ArrayList<String>();
         gatherPOMPaths( rootDir, pomPaths, ff );
+
+        if( CollectionUtils.isEmpty(pomPaths) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[SCAN] pomPaths is empty");
+        	}
+        	alertController.setNotificationDialog("No POMs Found", "No pom.xml files were found in the specified Project Root.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
 
         tblPOMS.getItems().clear();
         for( String path : pomPaths ) {
@@ -139,9 +191,6 @@ public class Controller {
     	}
 
     	try {
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false);
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(path);
 
@@ -169,21 +218,36 @@ public class Controller {
                 }
             }
 
-            return new POMObject(path, version, pVersion);
+            return new POMObject(path, version, pVersion, false);
 
         } catch(Exception exc) {
-            exc.printStackTrace();
-            return new POMObject(path, "", "");
+        	log.error( "error parsing path=" + path, exc );
+            return new POMObject(path, "Parse Error (will be skipped)", "Parse Error (will be skipped)", true);
         }
     }
 
     private void gatherPOMPaths(String rootDir, List<String> pomPaths, FilenameFilter ff) {
 
-        if( rootDir == null || rootDir.length() == 0 ) {
+        if( StringUtils.isEmpty(rootDir) ) {
+        	
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[GATHER] rootDir is empty");
+        	}
+        	
             return;
         }
 
         File rd = new File(rootDir);
+        
+        if( !rd.exists() ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[SCAN] rootDir does not exist");
+        	}
+        	alertController.setNotificationDialog("Project Root Does Not Exist", "The specified root directory '" + rootDir + "' does not exist.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
+
         if( rd.isFile() ) {
 
             if( rd.getName().equals("pom.xml") ) {
@@ -204,12 +268,38 @@ public class Controller {
     		log.debug("[UPDATE]");
     	}
 
+    	String newVersion = tfNewVersion.getText();
+        if( StringUtils.isEmpty(newVersion) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] newVersion is empty");
+        	}
+        	alertController.setNotificationDialog("No Version Specified", "Please specify a version.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
+
+        if( CollectionUtils.isEmpty(tblPOMS.getItems()) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] tblPOMS is empty");
+        	}
+        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a Project Root and press Scan.");
+        	vbox.toBack();  // bring up the alert view
+        	return;
+        }
+
         for( POMObject p : tblPOMS.getItems() ) {
 
         	if( log.isDebugEnabled() ) {
         		log.debug("[UPDATE] p=" + p.getAbsPath());
         	}
 
+        	if( p.getParseError() ) {
+        		if( log.isDebugEnabled() ) {
+        			log.debug("[UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
+        		}
+        		continue;
+        	}
+        	
             try {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 factory.setNamespaceAware(false);
@@ -252,5 +342,18 @@ public class Controller {
             	log.error( "error updating poms", exc );
             }
         }
+        
+        if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] issuing rescan command");
+        	}
+        	scan();
+        } else {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] did an update, but there is not value in root; clearing");
+        	}
+        	tblPOMS.getItems().clear();
+        }
     }
 }
+

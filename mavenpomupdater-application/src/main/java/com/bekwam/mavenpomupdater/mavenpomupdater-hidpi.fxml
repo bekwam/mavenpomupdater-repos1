@@ -9,9 +9,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
-<VBox fx:id="vbox" prefHeight="667.0" prefWidth="1270.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bekwam.mavenpomupdater.MainViewController">
+<VBox fx:id="vbox" prefHeight="1070.0" prefWidth="1997.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bekwam.mavenpomupdater.MainViewController">
    <children>
-      <GridPane>
+      <GridPane prefHeight="395.0" prefWidth="1845.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="1032.0" minWidth="10.0" prefWidth="291.0" />
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="1489.0" minWidth="10.0" prefWidth="677.0" />
@@ -48,7 +48,7 @@
             <Insets bottom="10.0" />
          </VBox.margin>
       </GridPane>
-      <TableView fx:id="tblPOMS" prefHeight="466.0" prefWidth="1170.0">
+      <TableView fx:id="tblPOMS" prefHeight="733.0" prefWidth="1875.0">
         <columns>
           <TableColumn fx:id="tcPath" minWidth="-Infinity" prefWidth="620.0" text="Path" />
             <TableColumn fx:id="tcVersion" minWidth="-Infinity" prefWidth="300.0" text="Version" />
