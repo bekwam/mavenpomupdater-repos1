@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -74,12 +75,16 @@ public class MainViewController {
     TableColumn<POMObject, String> tcParentVersion;
 
     AlertController alertController;
+    DocumentBuilderFactory factory;
     
     public MainViewController() {
     	
     	if( log.isDebugEnabled() ) {
     		log.debug("[CONTROLLER]");
     	}
+    	
+        factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(false);
     }
 
     @FXML
@@ -92,14 +97,29 @@ public class MainViewController {
         tcPath.setCellValueFactory(
                 new PropertyValueFactory<POMObject, String>("absPath")
         );
-
+        tcPath.setCellFactory(new WarningCellFactory());
+        
         tcVersion.setCellValueFactory(
                 new PropertyValueFactory<POMObject, String>("version")
         );
+        tcVersion.setCellFactory(new WarningCellFactory());
 
         tcParentVersion.setCellValueFactory(
                new PropertyValueFactory<POMObject, String>("parentVersion")
         );
+        tcParentVersion.setCellFactory(new WarningCellFactory());
+
+        Tooltip rdTooltip = new Tooltip();
+        rdTooltip.setText("Recursively search directory for POMs");
+        tfRootDir.setTooltip(rdTooltip);
+        
+        Tooltip fTooltip = new Tooltip();
+        fTooltip.setText("Comma-separated list of filter strings");
+        tfFilters.setTooltip(fTooltip);
+        
+        Tooltip nvTooltip = new Tooltip();
+        nvTooltip.setText("Value to update POM parent version and version");
+        tfNewVersion.setTooltip(nvTooltip);
     }
 
     @FXML
@@ -171,9 +191,6 @@ public class MainViewController {
     	}
 
     	try {
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false);
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(path);
 
@@ -201,11 +218,11 @@ public class MainViewController {
                 }
             }
 
-            return new POMObject(path, version, pVersion);
+            return new POMObject(path, version, pVersion, false);
 
         } catch(Exception exc) {
-            exc.printStackTrace();
-            return new POMObject(path, "", "");
+        	log.error( "error parsing path=" + path, exc );
+            return new POMObject(path, "Parse Error (will be skipped)", "Parse Error (will be skipped)", true);
         }
     }
 
@@ -276,6 +293,13 @@ public class MainViewController {
         		log.debug("[UPDATE] p=" + p.getAbsPath());
         	}
 
+        	if( p.getParseError() ) {
+        		if( log.isDebugEnabled() ) {
+        			log.debug("[UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
+        		}
+        		continue;
+        	}
+        	
             try {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 factory.setNamespaceAware(false);
@@ -317,6 +341,18 @@ public class MainViewController {
             } catch(Exception exc) {
             	log.error( "error updating poms", exc );
             }
+        }
+        
+        if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] issuing rescan command");
+        	}
+        	scan();
+        } else {
+        	if( log.isDebugEnabled() ) {
+        		log.debug("[UPDATE] did an update, but there is not value in root; clearing");
+        	}
+        	tblPOMS.getItems().clear();
         }
     }
 }

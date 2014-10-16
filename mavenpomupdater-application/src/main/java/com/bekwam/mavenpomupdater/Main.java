@@ -42,6 +42,12 @@ public class Main extends Application {
     	
     	List<String> unnamedList = params.getUnnamed();
     	
+    	if( log.isDebugEnabled() ) {
+    		for( String arg : unnamedList ) {
+    			log.debug("received arg " + arg);
+    		}
+    	}
+
     	String mpuFXML = "mavenpomupdater.fxml";
     	String alertFXML = "alert.fxml";
     	
