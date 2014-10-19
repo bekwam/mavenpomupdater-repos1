@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
@@ -37,6 +38,10 @@ public class Main extends Application {
 	
     @Override
     public void start(Stage primaryStage) throws Exception{
+    	
+    	primaryStage.getIcons().add(
+    			new Image("images/mpu_icon_64.png")
+    			);
     	
     	Application.Parameters params = getParameters();
     	
