@@ -13,7 +13,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
 import javafx.stage.Stage;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -36,6 +35,8 @@ public class Main extends Application {
 
 	private Log log = LogFactory.getLog(Main.class);
 	
+	PropertiesFileDAO versionFileDAO;
+	
     @Override
     public void start(Stage primaryStage) throws Exception{
     	
@@ -53,34 +54,29 @@ public class Main extends Application {
     		}
     	}
 
-    	String mpuFXML = "mavenpomupdater.fxml";
-    	String alertFXML = "alert.fxml";
-    	
     	if( CollectionUtils.isNotEmpty(unnamedList) 
     			&& StringUtils.equalsIgnoreCase(unnamedList.get(0), "hidpi") ) {
     		if( log.isInfoEnabled() ) {
-    			log.info("running in Hi-DPI display mode");
+    			log.info("running in Hi-DPI display mode (not fully implemented)");
     		}
-        	mpuFXML = "mavenpomupdater-hidpi.fxml";
-        	alertFXML = "alert-hidpi.fxml";
     	} else {
     		if( log.isInfoEnabled() ) {
     			log.info("running in normal display mode");
     		}
     	}
     	
-    	final StackPane sp = StackPaneBuilder.create().build();
+    	final StackPane sp = new StackPane();
     	
-    	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource(mpuFXML));
+    	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource("mavenpomupdater.fxml"));
     	Parent mainView = (Parent)mainViewLoader.load();
     	MainViewController mainViewController = mainViewLoader.getController();
     	
-    	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource(alertFXML));
+    	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource("alert.fxml"));
     	Parent alertView = (Parent)alertViewLoader.load();
     	
     	final AlertController alertController = alertViewLoader.getController();
     	mainViewController.alertController = alertController;
-
+    	
         mainView.getStyleClass().add("main-view-pane");
         
         final FlowPane fp = new FlowPane();

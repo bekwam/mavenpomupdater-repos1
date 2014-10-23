@@ -53,14 +53,6 @@
 			<scope>test</scope>
 		</dependency>
 		
-		<dependency>
-        	<groupId>javafx</groupId>
-        	<artifactId>javafx</artifactId>
-        	<version>2.1</version>
-        	<scope>system</scope>
-        	<systemPath>/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/jfxrt.jar</systemPath>
-    	</dependency>
-    
 	</dependencies>
 	
 	<properties>
@@ -71,6 +63,12 @@
 
 	<name>Maven POM Updater</name>
 	<description>A tool for bulk updating POMs with new version and parent version values</description>
+	<licenses>
+		<license>
+    		<name>Apache License, Version 2.0</name>
+    		<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+  		</license>
+  	</licenses>
 	<organization>
 		<name>Bekwam, Inc</name>
 		<url>http://www.bekwam.com</url>
@@ -83,8 +81,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 

@@ -9,15 +9,20 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
@@ -74,8 +79,25 @@ public class MainViewController {
     @FXML
     TableColumn<POMObject, String> tcParentVersion;
 
+    @FXML
+    ImageView aboutImageView;
+    
+    @FXML
+    TabPane tabPane;
+    
+    @FXML
+    Tab homeTab;
+    
+    @FXML
+    Tab aboutTab;
+    
+    @FXML
+    Label aboutVersionLabel;
+    
     AlertController alertController;
     DocumentBuilderFactory factory;
+    MenuBarDelegate menuBarDelegate;
+    AboutDelegate aboutDelegate;
     
     public MainViewController() {
     	
@@ -85,6 +107,9 @@ public class MainViewController {
     	
         factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(false);
+        
+        aboutDelegate = new AboutDelegate();
+        menuBarDelegate = new MenuBarDelegate();
     }
 
     @FXML
@@ -120,8 +145,30 @@ public class MainViewController {
         Tooltip nvTooltip = new Tooltip();
         nvTooltip.setText("Value to update POM parent version and version");
         tfNewVersion.setTooltip(nvTooltip);
-    }
+        
+    	PropertiesFileDAO propertiesFileDAO = new PropertiesFileDAO();
+    	Properties appProperties = propertiesFileDAO.getProperties();
+    	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
+    	//
+        // wire up delegates
+        //
+        aboutDelegate.imageView = aboutImageView;
+        aboutDelegate.tabPane = tabPane;
+        aboutDelegate.aboutTab = aboutTab;
+        aboutDelegate.version = version;
+        aboutDelegate.aboutVersionLabel = aboutVersionLabel;
+        
+        menuBarDelegate.tabPane = tabPane;
+        menuBarDelegate.homeTab = homeTab;
+        menuBarDelegate.aboutTab = aboutTab;
+        menuBarDelegate.supportURL = appProperties.getProperty(AppPropertiesKeys.SUPPORT_URL);
+        menuBarDelegate.licenseURL = appProperties.getProperty(AppPropertiesKeys.LICENSE_URL);
+        
+        aboutDelegate.init();
+
+    }
+    
     @FXML
     public void selectFile(ActionEvent evt) {
     	
@@ -354,6 +401,26 @@ public class MainViewController {
         	}
         	tblPOMS.getItems().clear();
         }
+    }
+    
+    @FXML
+    public void close() {
+    	menuBarDelegate.close();
+    }
+    
+    @FXML
+    public void showAbout() {
+    	menuBarDelegate.showAbout();
+    }
+    
+    @FXML
+    public void browseSupport() {
+    	menuBarDelegate.browseSupport();
+    }
+    
+    @FXML
+    public void browseLicense() {
+    	menuBarDelegate.browseLicense();
     }
 }
 
