@@ -113,6 +113,9 @@ public class Main extends Application {
     		if( log.isInfoEnabled() ) {
     			log.info("running in normal display mode");
     		}
+    		
+    		primaryStage.setWidth(1280.0);
+    		primaryStage.setHeight(720.0);
     	}
     	
         primaryStage.show();

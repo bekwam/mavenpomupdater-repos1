@@ -15,6 +15,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -98,6 +99,15 @@ public class MainViewController {
     @FXML
     Label aboutVersionLabel;
     
+    @FXML
+    MenuItem miCut;
+    
+    @FXML
+    MenuItem miCopy;
+    
+    @FXML
+    MenuItem miPaste;
+    
     AlertController alertController;
     DocumentBuilderFactory factory;
     MenuBarDelegate menuBarDelegate;
@@ -168,9 +178,17 @@ public class MainViewController {
         menuBarDelegate.aboutTab = aboutTab;
         menuBarDelegate.supportURL = appProperties.getProperty(AppPropertiesKeys.SUPPORT_URL);
         menuBarDelegate.licenseURL = appProperties.getProperty(AppPropertiesKeys.LICENSE_URL);
+        menuBarDelegate.miCut = miCut;
+        menuBarDelegate.miCopy = miCopy;
+        menuBarDelegate.miPaste = miPaste;
+        menuBarDelegate.tfFilters = tfFilters;
+        menuBarDelegate.tfNewVersion = tfNewVersion;
+        menuBarDelegate.tfRootDir = tfRootDir;
         
+        //
+        // initialize delegates
+        //
         aboutDelegate.init();
-
     }
     
     @FXML
@@ -425,6 +443,26 @@ public class MainViewController {
     @FXML
     public void browseLicense() {
     	menuBarDelegate.browseLicense();
+    }
+    
+    @FXML
+    public void cut() {
+    	menuBarDelegate.cut();
+    }
+    
+    @FXML
+    public void copy() {
+    	menuBarDelegate.copy();
+    }
+
+    @FXML
+    public void paste() {
+    	menuBarDelegate.paste();
+    }
+
+    @FXML
+    public void showingEditMenu() {
+    	menuBarDelegate.showingEditMenu();
     }
     
     public void adjustForHiDPI() {
