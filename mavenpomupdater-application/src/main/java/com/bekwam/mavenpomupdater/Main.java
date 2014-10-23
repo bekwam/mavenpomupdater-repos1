@@ -54,17 +54,6 @@ public class Main extends Application {
     		}
     	}
 
-    	if( CollectionUtils.isNotEmpty(unnamedList) 
-    			&& StringUtils.equalsIgnoreCase(unnamedList.get(0), "hidpi") ) {
-    		if( log.isInfoEnabled() ) {
-    			log.info("running in Hi-DPI display mode (not fully implemented)");
-    		}
-    	} else {
-    		if( log.isInfoEnabled() ) {
-    			log.info("running in normal display mode");
-    		}
-    	}
-    	
     	final StackPane sp = new StackPane();
     	
     	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource("mavenpomupdater.fxml"));
@@ -108,6 +97,24 @@ public class Main extends Application {
         });
         
         primaryStage.setScene(scene);
+        
+    	if( CollectionUtils.isNotEmpty(unnamedList) 
+    			&& StringUtils.equalsIgnoreCase(unnamedList.get(0), "hidpi") ) {
+    		
+    		if( log.isInfoEnabled() ) {
+    			log.info("running in Hi-DPI display mode");
+    		}
+            primaryStage.setWidth(1920.0);
+            primaryStage.setHeight(1080.0);
+            
+            mainViewController.adjustForHiDPI();
+            
+    	} else {
+    		if( log.isInfoEnabled() ) {
+    			log.info("running in normal display mode");
+    		}
+    	}
+    	
         primaryStage.show();
     }
 

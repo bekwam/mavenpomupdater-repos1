@@ -23,6 +23,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
@@ -57,6 +58,9 @@ public class MainViewController {
 	
 	@FXML
 	VBox vbox;
+	
+	@FXML
+	GridPane gp; // for hi-dpi treatment
 	
     @FXML
     TextField tfRootDir;
@@ -421,6 +425,13 @@ public class MainViewController {
     @FXML
     public void browseLicense() {
     	menuBarDelegate.browseLicense();
+    }
+    
+    public void adjustForHiDPI() {
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[ADJUST]");
+    	}
+    	gp.setPrefHeight(270.0);
     }
 }
 
