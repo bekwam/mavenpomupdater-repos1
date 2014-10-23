@@ -148,18 +148,6 @@ public class MainViewController {
         );
         tcParentVersion.setCellFactory(new WarningCellFactory());
 
-        Tooltip rdTooltip = new Tooltip();
-        rdTooltip.setText("Recursively search directory for POMs");
-        tfRootDir.setTooltip(rdTooltip);
-        
-        Tooltip fTooltip = new Tooltip();
-        fTooltip.setText("Comma-separated list of filter strings");
-        tfFilters.setTooltip(fTooltip);
-        
-        Tooltip nvTooltip = new Tooltip();
-        nvTooltip.setText("Value to update POM parent version and version");
-        tfNewVersion.setTooltip(nvTooltip);
-        
     	PropertiesFileDAO propertiesFileDAO = new PropertiesFileDAO();
     	Properties appProperties = propertiesFileDAO.getProperties();
     	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);

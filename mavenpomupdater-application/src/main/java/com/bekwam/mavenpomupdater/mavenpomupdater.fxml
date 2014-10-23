@@ -66,12 +66,21 @@
                           </rowConstraints>
                            <children>
                               <Label text="Project Root" />
-                              <TextField fx:id="tfRootDir" prefHeight="65.0" prefWidth="736.0" GridPane.columnIndex="1" />
+                              <TextField fx:id="tfRootDir" prefHeight="65.0" prefWidth="736.0" GridPane.columnIndex="1">
+                                 <tooltip>
+                                    <Tooltip text="Recursively search directory for POMs" />
+                                 </tooltip></TextField>
                               <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2" />
-                              <TextField fx:id="tfFilters" prefHeight="65.0" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="tfFilters" prefHeight="65.0" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <tooltip>
+                                    <Tooltip text="Comma-separated list of filter strings" />
+                                 </tooltip></TextField>
                               <Label text="Filters" GridPane.rowIndex="1" />
                               <Label text="New Version" GridPane.rowIndex="2" />
-                              <TextField fx:id="tfNewVersion" prefHeight="65.0" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <TextField fx:id="tfNewVersion" prefHeight="65.0" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <tooltip>
+                                    <Tooltip text="Value to update POM parent version and version" />
+                                 </tooltip></TextField>
                               <Button mnemonicParsing="false" onAction="#update" text="Update" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                               <Button mnemonicParsing="false" onAction="#scan" text="Scan" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                            </children>
