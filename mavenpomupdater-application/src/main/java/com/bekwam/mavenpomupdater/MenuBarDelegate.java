@@ -228,7 +228,7 @@ public class MenuBarDelegate {
 
 		} else {
 			if( log.isDebugEnabled() ) {
-				log.debug("[SHOWING EDIT MENU] there is a selection");
+				log.debug("[SHOWING EDIT MENU] there is a DE-selection");
 			}
 			adjustForDeselection();
 		}
