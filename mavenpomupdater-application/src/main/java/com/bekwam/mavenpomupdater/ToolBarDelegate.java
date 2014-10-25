@@ -39,6 +39,21 @@ public class ToolBarDelegate {
 	String lastSelectedText;
 	IndexRange lastSelectedRange;
 	
+	public void init() {
+		if( log.isDebugEnabled() ) {
+			log.debug("[INIT]");
+		}
+		
+		if( systemClipboard == null ) {
+			systemClipboard = Clipboard.getSystemClipboard();
+		}
+
+		if( systemClipboard.hasContent(DataFormat.PLAIN_TEXT) ) {
+			tbPaste.setDisable(false);
+		}
+
+	}
+	
 	public void cut() {
 		if( log.isDebugEnabled() ) {
 			log.debug("[CUT]");

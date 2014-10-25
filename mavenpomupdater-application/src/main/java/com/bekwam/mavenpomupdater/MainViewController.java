@@ -23,6 +23,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -164,6 +165,15 @@ public class MainViewController {
     	Properties appProperties = propertiesFileDAO.getProperties();
     	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
+    	Image cutImage = new Image("images/cut32.png");
+    	tbCut.setGraphic(new ImageView(cutImage));
+    	
+    	Image copyImage = new Image("images/copy32.png");
+    	tbCopy.setGraphic(new ImageView(copyImage));
+
+    	Image pasteImage = new Image("images/paste32.png");
+    	tbPaste.setGraphic(new ImageView(pasteImage));
+
     	//
         // wire up delegates
         //
@@ -196,6 +206,7 @@ public class MainViewController {
         // initialize delegates
         //
         aboutDelegate.init();
+        toolBarDelegate.init();
     }
     
     @FXML
