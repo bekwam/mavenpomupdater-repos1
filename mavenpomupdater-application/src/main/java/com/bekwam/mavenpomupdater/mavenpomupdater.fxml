@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
@@ -9,54 +11,131 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
-<VBox fx:id="vbox" prefHeight="667.0" prefWidth="1270.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bekwam.mavenpomupdater.MainViewController">
+<VBox fx:id="vbox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bekwam.mavenpomupdater.MainViewController">
    <children>
-      <GridPane>
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1032.0" minWidth="10.0" prefWidth="291.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1489.0" minWidth="10.0" prefWidth="677.0" />
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="966.0" minWidth="10.0" prefWidth="397.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-            <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-        </rowConstraints>
-         <children>
-            <Label text="Project Root" />
-            <TextField fx:id="tfRootDir" prefHeight="65.0" prefWidth="736.0" GridPane.columnIndex="1" />
-            <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2" />
-            <TextField fx:id="tfFilters" prefHeight="65.0" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label text="Filters" GridPane.rowIndex="1" />
-            <Label text="New Version" GridPane.rowIndex="2" />
-            <TextField fx:id="tfNewVersion" prefHeight="65.0" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" onAction="#update" text="Update" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" onAction="#scan" text="Scan" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-         </children>
-         <VBox.margin>
-            <Insets bottom="10.0" />
-         </VBox.margin>
-      </GridPane>
-      <TableView fx:id="tblPOMS" prefHeight="466.0" prefWidth="1170.0">
-        <columns>
-          <TableColumn fx:id="tcPath" minWidth="-Infinity" prefWidth="620.0" text="Path" />
-            <TableColumn fx:id="tcVersion" minWidth="-Infinity" prefWidth="300.0" text="Version" />
-          <TableColumn fx:id="tcParentVersion" minWidth="-Infinity" prefWidth="300.0" text="Parent" />
-        </columns>
-      </TableView>
+      <MenuBar>
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#close" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" onShowing="#showingEditMenu" text="Edit">
+            <items>
+              <MenuItem fx:id="miCut" mnemonicParsing="false" onAction="#cut" text="Cut" />
+                  <MenuItem fx:id="miCopy" mnemonicParsing="false" onAction="#copy" text="Copy" />
+                  <MenuItem fx:id="miPaste" mnemonicParsing="false" onAction="#paste" text="Paste" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#showAbout" text="About" />
+                  <MenuItem mnemonicParsing="false" onAction="#browseLicense" text="License" />
+                  <MenuItem mnemonicParsing="false" onAction="#browseSupport" text="Support" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <ToolBar prefHeight="40.0" prefWidth="200.0">
+        <items>
+          <Button fx:id="tbCut" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#tbCut" text="Cut" />
+            <Button fx:id="tbCopy" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#tbCopy" text="Copy" />
+            <Button fx:id="tbPaste" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#tbPaste" text="Paste" />
+        </items>
+      </ToolBar>
+      <TabPane fx:id="tabPane">
+         <tabs>
+            <Tab fx:id="homeTab" closable="false" text="Home">
+               <content>
+                  <VBox prefHeight="667.0" prefWidth="1270.0">
+                     <children>
+                        <GridPane fx:id="gp" prefHeight="270.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1032.0" minWidth="10.0" prefWidth="291.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1489.0" minWidth="10.0" prefWidth="677.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="966.0" minWidth="10.0" prefWidth="397.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Project Root" />
+                              <TextField fx:id="tfRootDir" onMouseReleased="#toolBarMouseReleased" prefHeight="65.0" prefWidth="736.0" GridPane.columnIndex="1">
+                                 <tooltip>
+                                    <Tooltip text="Recursively search directory for POMs" />
+                                 </tooltip>
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </GridPane.margin></TextField>
+                              <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2" />
+                              <TextField fx:id="tfFilters" onMouseReleased="#toolBarMouseReleased" prefHeight="65.0" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <tooltip>
+                                    <Tooltip text="Comma-separated list of filter strings" />
+                                 </tooltip>
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </GridPane.margin></TextField>
+                              <Label text="Filters" GridPane.rowIndex="1" />
+                              <Label text="New Version" GridPane.rowIndex="2" />
+                              <TextField fx:id="tfNewVersion" onMouseReleased="#toolBarMouseReleased" prefHeight="65.0" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <tooltip>
+                                    <Tooltip text="Value to update POM parent version and version" />
+                                 </tooltip>
+                                 <GridPane.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </GridPane.margin></TextField>
+                              <Button mnemonicParsing="false" onAction="#update" text="Update" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <Button mnemonicParsing="false" onAction="#scan" text="Scan" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </GridPane>
+                        <TableView fx:id="tblPOMS" prefHeight="460.0" prefWidth="1170.0">
+                          <columns>
+                            <TableColumn fx:id="tcPath" minWidth="-Infinity" prefWidth="620.0" text="Path" />
+                              <TableColumn fx:id="tcVersion" minWidth="-Infinity" prefWidth="300.0" text="Version" />
+                            <TableColumn fx:id="tcParentVersion" minWidth="-Infinity" prefWidth="300.0" text="Parent" />
+                          </columns>
+                        </TableView>
+                     </children>
+                     <padding>
+                        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+            <Tab fx:id="aboutTab" text="About">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <ImageView fx:id="aboutImageView" fitHeight="480.0" fitWidth="640.0" layoutX="235.0" layoutY="34.0" pickOnBounds="true" preserveRatio="true" />
+                        <Label id="aboutVersionLabel" fx:id="aboutVersionLabel" layoutX="235.0" layoutY="484.0" prefHeight="16.0" prefWidth="319.0" text="Label">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" />
+                           </padding>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+         </tabs>
+      </TabPane>
    </children>
-   <padding>
-      <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-   </padding>
 </VBox>

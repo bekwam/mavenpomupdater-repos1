@@ -9,3 +9,7 @@
 .alert-background-pane {
 	-fx-background-color: rgba(64, 64, 64, 0.85);
 }
+
+#aboutVersionLabel {
+	-fx-text-fill: #404040;
+}

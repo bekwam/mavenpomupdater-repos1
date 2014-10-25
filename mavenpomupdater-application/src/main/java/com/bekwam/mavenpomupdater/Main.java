@@ -8,11 +8,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
 import javafx.stage.Stage;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -35,8 +35,14 @@ public class Main extends Application {
 
 	private Log log = LogFactory.getLog(Main.class);
 	
+	PropertiesFileDAO versionFileDAO;
+	
     @Override
     public void start(Stage primaryStage) throws Exception{
+    	
+    	primaryStage.getIcons().add(
+    			new Image("images/mpu_icon_64.png")
+    			);
     	
     	Application.Parameters params = getParameters();
     	
@@ -48,34 +54,18 @@ public class Main extends Application {
     		}
     	}
 
-    	String mpuFXML = "mavenpomupdater.fxml";
-    	String alertFXML = "alert.fxml";
+    	final StackPane sp = new StackPane();
     	
-    	if( CollectionUtils.isNotEmpty(unnamedList) 
-    			&& StringUtils.equalsIgnoreCase(unnamedList.get(0), "hidpi") ) {
-    		if( log.isInfoEnabled() ) {
-    			log.info("running in Hi-DPI display mode");
-    		}
-        	mpuFXML = "mavenpomupdater-hidpi.fxml";
-        	alertFXML = "alert-hidpi.fxml";
-    	} else {
-    		if( log.isInfoEnabled() ) {
-    			log.info("running in normal display mode");
-    		}
-    	}
-    	
-    	final StackPane sp = StackPaneBuilder.create().build();
-    	
-    	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource(mpuFXML));
+    	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource("mavenpomupdater.fxml"));
     	Parent mainView = (Parent)mainViewLoader.load();
     	MainViewController mainViewController = mainViewLoader.getController();
     	
-    	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource(alertFXML));
+    	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource("alert.fxml"));
     	Parent alertView = (Parent)alertViewLoader.load();
     	
     	final AlertController alertController = alertViewLoader.getController();
     	mainViewController.alertController = alertController;
-
+    	
         mainView.getStyleClass().add("main-view-pane");
         
         final FlowPane fp = new FlowPane();
@@ -107,6 +97,27 @@ public class Main extends Application {
         });
         
         primaryStage.setScene(scene);
+        
+    	if( CollectionUtils.isNotEmpty(unnamedList) 
+    			&& StringUtils.equalsIgnoreCase(unnamedList.get(0), "hidpi") ) {
+    		
+    		if( log.isInfoEnabled() ) {
+    			log.info("running in Hi-DPI display mode");
+    		}
+            primaryStage.setWidth(1920.0);
+            primaryStage.setHeight(1080.0);
+            
+            mainViewController.adjustForHiDPI();
+            
+    	} else {
+    		if( log.isInfoEnabled() ) {
+    			log.info("running in normal display mode");
+    		}
+    		
+    		primaryStage.setWidth(1280.0);
+    		primaryStage.setHeight(720.0);
+    	}
+    	
         primaryStage.show();
     }
 

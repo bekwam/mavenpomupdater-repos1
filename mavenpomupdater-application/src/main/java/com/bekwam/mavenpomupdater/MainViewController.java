@@ -9,15 +9,24 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.IndexRange;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
@@ -53,6 +62,9 @@ public class MainViewController {
 	@FXML
 	VBox vbox;
 	
+	@FXML
+	GridPane gp; // for hi-dpi treatment
+	
     @FXML
     TextField tfRootDir;
 
@@ -74,8 +86,44 @@ public class MainViewController {
     @FXML
     TableColumn<POMObject, String> tcParentVersion;
 
+    @FXML
+    ImageView aboutImageView;
+    
+    @FXML
+    TabPane tabPane;
+    
+    @FXML
+    Tab homeTab;
+    
+    @FXML
+    Tab aboutTab;
+    
+    @FXML
+    Label aboutVersionLabel;
+    
+    @FXML
+    MenuItem miCut;
+    
+    @FXML
+    MenuItem miCopy;
+    
+    @FXML
+    MenuItem miPaste;
+    
+    @FXML
+    Button tbCut;
+    
+    @FXML
+    Button tbCopy;
+    
+    @FXML
+    Button tbPaste;
+    
     AlertController alertController;
     DocumentBuilderFactory factory;
+    MenuBarDelegate menuBarDelegate;
+    AboutDelegate aboutDelegate;
+    ToolBarDelegate toolBarDelegate;
     
     public MainViewController() {
     	
@@ -85,6 +133,10 @@ public class MainViewController {
     	
         factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(false);
+        
+        aboutDelegate = new AboutDelegate();
+        menuBarDelegate = new MenuBarDelegate();
+        toolBarDelegate = new ToolBarDelegate();
     }
 
     @FXML
@@ -109,19 +161,54 @@ public class MainViewController {
         );
         tcParentVersion.setCellFactory(new WarningCellFactory());
 
-        Tooltip rdTooltip = new Tooltip();
-        rdTooltip.setText("Recursively search directory for POMs");
-        tfRootDir.setTooltip(rdTooltip);
-        
-        Tooltip fTooltip = new Tooltip();
-        fTooltip.setText("Comma-separated list of filter strings");
-        tfFilters.setTooltip(fTooltip);
-        
-        Tooltip nvTooltip = new Tooltip();
-        nvTooltip.setText("Value to update POM parent version and version");
-        tfNewVersion.setTooltip(nvTooltip);
-    }
+    	PropertiesFileDAO propertiesFileDAO = new PropertiesFileDAO();
+    	Properties appProperties = propertiesFileDAO.getProperties();
+    	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
+    	Image cutImage = new Image("images/cut32.png");
+    	tbCut.setGraphic(new ImageView(cutImage));
+    	
+    	Image copyImage = new Image("images/copy32.png");
+    	tbCopy.setGraphic(new ImageView(copyImage));
+
+    	Image pasteImage = new Image("images/paste32.png");
+    	tbPaste.setGraphic(new ImageView(pasteImage));
+
+    	//
+        // wire up delegates
+        //
+        aboutDelegate.imageView = aboutImageView;
+        aboutDelegate.tabPane = tabPane;
+        aboutDelegate.aboutTab = aboutTab;
+        aboutDelegate.version = version;
+        aboutDelegate.aboutVersionLabel = aboutVersionLabel;
+        
+        menuBarDelegate.tabPane = tabPane;
+        menuBarDelegate.homeTab = homeTab;
+        menuBarDelegate.aboutTab = aboutTab;
+        menuBarDelegate.supportURL = appProperties.getProperty(AppPropertiesKeys.SUPPORT_URL);
+        menuBarDelegate.licenseURL = appProperties.getProperty(AppPropertiesKeys.LICENSE_URL);
+        menuBarDelegate.miCut = miCut;
+        menuBarDelegate.miCopy = miCopy;
+        menuBarDelegate.miPaste = miPaste;
+        menuBarDelegate.tfFilters = tfFilters;
+        menuBarDelegate.tfNewVersion = tfNewVersion;
+        menuBarDelegate.tfRootDir = tfRootDir;
+        
+        toolBarDelegate.tbCut = tbCut;
+        toolBarDelegate.tbCopy = tbCopy;
+        toolBarDelegate.tbPaste = tbPaste;
+        toolBarDelegate.tfFilters = tfFilters;
+        toolBarDelegate.tfNewVersion = tfNewVersion;
+        toolBarDelegate.tfRootDir = tfRootDir;
+
+        //
+        // initialize delegates
+        //
+        aboutDelegate.init();
+        toolBarDelegate.init();
+    }
+    
     @FXML
     public void selectFile(ActionEvent evt) {
     	
@@ -355,5 +442,87 @@ public class MainViewController {
         	tblPOMS.getItems().clear();
         }
     }
+    
+    @FXML
+    public void close() {
+    	menuBarDelegate.close();
+    }
+    
+    @FXML
+    public void showAbout() {
+    	menuBarDelegate.showAbout();
+    }
+    
+    @FXML
+    public void browseSupport() {
+    	menuBarDelegate.browseSupport();
+    }
+    
+    @FXML
+    public void browseLicense() {
+    	menuBarDelegate.browseLicense();
+    }
+    
+    @FXML
+    public void cut() {
+    	menuBarDelegate.cut();
+    }
+    
+    @FXML
+    public void copy() {
+    	menuBarDelegate.copy();
+    }
+
+    @FXML
+    public void paste() {
+    	menuBarDelegate.paste();
+    }
+
+    @FXML
+    public void tbCut() {
+    	toolBarDelegate.cut();
+    }
+    
+    @FXML
+    public void tbCopy() {
+    	toolBarDelegate.copy();
+    }
+
+    @FXML
+    public void tbPaste() {
+    	toolBarDelegate.paste();
+    }
+
+    @FXML
+    public void showingEditMenu() {
+    	menuBarDelegate.showingEditMenu();
+    }
+
+    @FXML
+    public void toolBarMouseReleased(MouseEvent evt) {
+    	
+    	TextField tf = (TextField)evt.getSource();
+    	String selectedText = tf.getSelectedText();
+    	IndexRange selectedRange = tf.getSelection();
+    	
+    	toolBarDelegate.updateToolBarForClipboard(tf, selectedText, selectedRange);
+    }
+
+    public void adjustForHiDPI() {
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[ADJUST]");
+    	}
+    	gp.setPrefHeight(270.0);
+    }
+    
+    @FXML
+    public void mouseTest(MouseEvent evt) {
+    	log.debug("[MOUSE] evt type=" + evt.getEventType());
+    	
+    }
+    
+    // release w. a selection -> something selected for cut and copy
+    
+    // release w/o a selection -> no selection; potential target of paste
 }
 
