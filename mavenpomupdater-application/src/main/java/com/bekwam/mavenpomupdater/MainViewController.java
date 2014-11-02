@@ -134,6 +134,12 @@ public class MainViewController {
     @FXML
     Button tbPaste;
     
+    @FXML
+    Button tbScan;
+    
+    @FXML
+    Button tbUpdate;
+    
     AlertController alertController;
     DocumentBuilderFactory factory;
     MenuBarDelegate menuBarDelegate;
@@ -189,6 +195,12 @@ public class MainViewController {
     	Image pasteImage = new Image("images/paste32.png");
     	tbPaste.setGraphic(new ImageView(pasteImage));
 
+    	Image scanImage = new Image("images/scan32.png");
+    	tbScan.setGraphic(new ImageView(scanImage));
+    	
+    	Image updateImage = new Image("images/update32.png");
+    	tbUpdate.setGraphic(new ImageView(updateImage));
+    	
     	//
         // wire up delegates
         //

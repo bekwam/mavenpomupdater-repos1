@@ -15,7 +15,7 @@
  License for the specific language governing permissions and limitations 
  under the License.
  -->
- 
+
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.geometry.*?>
@@ -57,6 +57,9 @@
           <Button fx:id="tbCut" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#tbCut" text="Cut" />
             <Button fx:id="tbCopy" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#tbCopy" text="Copy" />
             <Button fx:id="tbPaste" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#tbPaste" text="Paste" />
+            <Separator orientation="VERTICAL" prefHeight="100.0" />
+            <Button fx:id="tbScan" contentDisplay="TOP" mnemonicParsing="false" onAction="#scan" text="Scan" />
+            <Button fx:id="tbUpdate" contentDisplay="TOP" mnemonicParsing="false" onAction="#update" text="Update" />
         </items>
       </ToolBar>
       <TabPane fx:id="tabPane">
