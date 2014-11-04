@@ -15,17 +15,16 @@
  */
 package com.bekwam.mavenpomupdater;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -80,6 +79,7 @@ public class Main extends Application {
     	
     	final AlertController alertController = alertViewLoader.getController();
     	mainViewController.alertController = alertController;
+    	alertController.mainViewControllerRef = new WeakReference<MainViewController>(mainViewController);
     	
         mainView.getStyleClass().add("main-view-pane");
         
@@ -98,18 +98,16 @@ public class Main extends Application {
         Scene scene = new Scene(sp);
         scene.getStylesheets().add("com/bekwam/mavenpomupdater/mpu.css");
         
-        scene.setOnKeyPressed( new EventHandler<KeyEvent>() {
-        	 @Override
-             public void handle(KeyEvent t) {
-                 KeyCode key = t.getCode();
-                 if (key == KeyCode.ESCAPE  && (sp.getChildren().get(1) == fp)) {
-                	 if( log.isDebugEnabled() ) {
-                		 log.debug("[KEY] the escape key was pressed on the alert screen");
-                		 alertController.dismiss();
-                	 }
-                 }
-             }
-        });
+        scene.setOnKeyPressed(
+        	keyEvent -> {
+                KeyCode key = keyEvent.getCode();
+                if (key == KeyCode.ESCAPE  && (sp.getChildren().get(1) == fp)) {
+                	if( log.isDebugEnabled() ) {
+                		log.debug("[ESCAPE]");
+                	}
+               		alertController.action();
+                }
+        	});
         
         primaryStage.setScene(scene);
         

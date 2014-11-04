@@ -392,84 +392,100 @@ public class MainViewController {
         	return;
         }
 
-        if( CollectionUtils.isEmpty(tblPOMS.getItems()) ) {
+        int npoms = CollectionUtils.size(tblPOMS.getItems());
+        if( npoms == 0 ) {
         	if( log.isDebugEnabled() ) {
         		log.debug("[UPDATE] tblPOMS is empty");
         	}
         	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a Project Root and press Scan.");
         	vbox.toBack();  // bring up the alert view
         	return;
-        }
-
-        for( POMObject p : tblPOMS.getItems() ) {
-
-        	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] p=" + p.getAbsPath());
-        	}
-
-        	if( p.getParseError() ) {
-        		if( log.isDebugEnabled() ) {
-        			log.debug("[UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
-        		}
-        		continue;
-        	}
-        	
-            try {
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setNamespaceAware(false);
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(p.getAbsPath());
-
-                if( p.getParentVersion() != null && p.getParentVersion().length() > 0 ) {
-                    XPath xpath = XPathFactory.newInstance().newXPath();
-                    XPathExpression expression = xpath.compile("//project/parent/version/text()");
-                    Node node = (Node) expression.evaluate( doc, XPathConstants.NODE);
-                    node.setNodeValue( tfNewVersion.getText() );
-                }
-
-                if( p.getVersion() != null && p.getVersion().length() > 0 ) {
-                    XPath xpath = XPathFactory.newInstance().newXPath();
-                    XPathExpression expression = xpath.compile("//project/version/text()");
-                    Node node = (Node) expression.evaluate(doc, XPathConstants.NODE);
-                    node.setNodeValue( tfNewVersion.getText() );
-                }
-
-                TransformerFactory tFactory =
-                        TransformerFactory.newInstance();
-                Transformer transformer = tFactory.newTransformer();
-
-                String workingFileName = p.getAbsPath() + ".mpu";
-                FileWriter fw = new FileWriter(workingFileName);
-                DOMSource source = new DOMSource(doc);
-                StreamResult result = new StreamResult(fw);
-                transformer.transform(source, result);
-                fw.close();
-
-                Path src = FileSystems.getDefault().getPath( workingFileName );
-                Path target = FileSystems.getDefault().getPath( p.getAbsPath() );
-
-                Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
-
-                Files.delete( src );
-
-            } catch(Exception exc) {
-            	log.error( "error updating poms", exc );
-            }
-        }
-        
-        if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
-        	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] issuing rescan command");
-        	}
-        	scan();
         } else {
+        	
         	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] did an update, but there is not value in root; clearing");
+        		log.debug("[UPDATE] confirming update operation");
         	}
-        	tblPOMS.getItems().clear();
+        	alertController.setConfirmationDialog(
+        			"Confirm Update", 
+        			"This wil update " + npoms + " POM files.  Continue?",
+        			mv -> mv.doUpdate()
+        			);
+        
+        	vbox.toBack();       	
         }
     }
     
+    public void doUpdate() {
+    	for( POMObject p : tblPOMS.getItems() ) {
+
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[DO UPDATE] p=" + p.getAbsPath());
+    	}
+
+    	if( p.getParseError() ) {
+    		if( log.isDebugEnabled() ) {
+    			log.debug("[DO UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
+    		}
+    		continue;
+    	}
+    	
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(p.getAbsPath());
+
+            if( p.getParentVersion() != null && p.getParentVersion().length() > 0 ) {
+                XPath xpath = XPathFactory.newInstance().newXPath();
+                XPathExpression expression = xpath.compile("//project/parent/version/text()");
+                Node node = (Node) expression.evaluate( doc, XPathConstants.NODE);
+                node.setNodeValue( tfNewVersion.getText() );
+            }
+
+            if( p.getVersion() != null && p.getVersion().length() > 0 ) {
+                XPath xpath = XPathFactory.newInstance().newXPath();
+                XPathExpression expression = xpath.compile("//project/version/text()");
+                Node node = (Node) expression.evaluate(doc, XPathConstants.NODE);
+                node.setNodeValue( tfNewVersion.getText() );
+            }
+
+            TransformerFactory tFactory =
+                    TransformerFactory.newInstance();
+            Transformer transformer = tFactory.newTransformer();
+
+            String workingFileName = p.getAbsPath() + ".mpu";
+            FileWriter fw = new FileWriter(workingFileName);
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(fw);
+            transformer.transform(source, result);
+            fw.close();
+
+            Path src = FileSystems.getDefault().getPath( workingFileName );
+            Path target = FileSystems.getDefault().getPath( p.getAbsPath() );
+
+            Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
+
+            Files.delete( src );
+
+        } catch(Exception exc) {
+        	log.error( "error updating poms", exc );
+        }
+    }
+    
+    if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[DO UPDATE] issuing rescan command");
+    	}
+    	scan();
+    } else {
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[DO UPDATE] did an update, but there is not value in root; clearing");
+    	}
+    	tblPOMS.getItems().clear();
+    } 
+
+    }
+
     @FXML
     public void close() {
     	menuBarDelegate.close();

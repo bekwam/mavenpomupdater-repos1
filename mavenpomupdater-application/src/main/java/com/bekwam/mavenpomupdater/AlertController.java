@@ -15,6 +15,9 @@
  */
 package com.bekwam.mavenpomupdater;
 
+import java.lang.ref.WeakReference;
+import java.util.function.Consumer;
+
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -52,6 +55,10 @@ public class AlertController {
 	@FXML
 	Button okButton;
 	
+	Consumer<MainViewController> okCallback;
+	
+	WeakReference<MainViewController> mainViewControllerRef;
+	
 	@FXML
 	public void initialize() {
 		if( log.isDebugEnabled() ) {
@@ -60,21 +67,58 @@ public class AlertController {
 	}
 
 	@FXML
-	public void dismiss() {
+	public void action() {
 		
 		if( log.isDebugEnabled() ) {
-			log.debug("[DISMISS]");
+			log.debug("[ACTION]");
 		}
 		
 		Parent flowPane = gp.getParent();
 		flowPane.toBack();
 	}
-	
+
+	@FXML
+	public void ok() {
+		
+		if( log.isDebugEnabled() ) {
+			log.debug("[OK]");
+		}
+		
+		okCallback.accept(mainViewControllerRef.get());
+		
+		Parent flowPane = gp.getParent();
+		flowPane.toBack();
+	}
+
+	@FXML
+	public void cancel() {
+		
+		if( log.isDebugEnabled() ) {
+			log.debug("[CANCEL]");
+		}
+		
+		Parent flowPane = gp.getParent();
+		flowPane.toBack();
+	}
+
 	public void setNotificationDialog(String message, String details) {
+		actionButton.setVisible(true);
 		cancelButton.setVisible(false);
 		okButton.setVisible(false);
 		actionButton.setText( "Dismiss" );
 		messageLabel.setText( message );
 		detailsLabel.setText( details );
+	}
+	
+	public void setConfirmationDialog(String message, 
+									  String details, 
+									  Consumer<MainViewController> okCallback) {
+		
+		actionButton.setVisible(false);
+		cancelButton.setVisible(true);
+		okButton.setVisible(true);
+		messageLabel.setText( message );
+		detailsLabel.setText( details );
+		this.okCallback = okCallback;
 	}
 }
