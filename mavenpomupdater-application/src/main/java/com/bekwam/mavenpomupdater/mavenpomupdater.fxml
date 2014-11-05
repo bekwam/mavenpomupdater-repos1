@@ -43,6 +43,11 @@
                   <MenuItem fx:id="miPaste" mnemonicParsing="false" onAction="#paste" text="Paste" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="View">
+              <items>
+                  <CheckMenuItem fx:id="miErrorLog" mnemonicParsing="false" onAction="#showOrHideErrorLog" text="Error Log" />
+              </items>
+            </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#showAbout" text="About" />
@@ -60,6 +65,8 @@
             <Separator orientation="VERTICAL" prefHeight="100.0" />
             <Button fx:id="tbScan" contentDisplay="TOP" mnemonicParsing="false" onAction="#scan" text="Scan" />
             <Button fx:id="tbUpdate" contentDisplay="TOP" mnemonicParsing="false" onAction="#update" text="Update" />
+            <Separator orientation="VERTICAL" prefHeight="100.0" />
+            <Button fx:id="tbClear" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#clearErrorLog" text="Clear" />
         </items>
       </ToolBar>
       <TabPane fx:id="tabPane">
@@ -136,6 +143,28 @@
                      </padding>
                   </VBox>
                </content>
+            </Tab>
+            <Tab fx:id="errorLogTab" onCloseRequest="#closingErrorLogTab" text="Error Log">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <TableView fx:id="tblErrors" layoutX="6.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <columns>
+                            <TableColumn fx:id="tcTime" prefWidth="242.0" text="Time" />
+                            <TableColumn fx:id="tcFile" prefWidth="350.0" text="File" />
+                              <TableColumn fx:id="tcMessage" prefWidth="563.0" text="Message" />
+                          </columns>
+                           <contextMenu>
+                              <ContextMenu>
+                                <items>
+                                  <MenuItem mnemonicParsing="false" onAction="#clearErrorLog" text="Clear" />
+                                </items>
+                              </ContextMenu>
+                           </contextMenu>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+              </content>
             </Tab>
             <Tab fx:id="aboutTab" text="About">
               <content>

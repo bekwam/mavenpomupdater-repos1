@@ -44,6 +44,7 @@ public class MenuBarDelegate {
 	TabPane tabPane;
 	Tab homeTab;
 	Tab aboutTab;
+	Tab errorLogTab;
 	String supportURL;
 	String licenseURL;
 	MenuItem miCut, miCopy, miPaste;
@@ -72,6 +73,32 @@ public class MenuBarDelegate {
 		tabPane.getSelectionModel().select(aboutTab);
 	}
 	
+	public void showErrorLog() {
+		
+		if( log.isDebugEnabled() ) {
+			log.debug("[SHOW ERROR LOG]");
+		}
+		
+		if( !tabPane.getTabs().contains( errorLogTab ) ) {
+			tabPane.getTabs().add( errorLogTab );
+		}
+		
+		tabPane.getSelectionModel().select(errorLogTab);
+	}
+
+	public void hideErrorLog() {
+		
+		if( log.isDebugEnabled() ) {
+			log.debug("[HIDE ERROR LOG]");
+		}
+		
+		if( tabPane.getTabs().contains( errorLogTab ) ) {
+			tabPane.getTabs().remove( errorLogTab );
+		}
+		
+		tabPane.getSelectionModel().select(homeTab);
+	}
+
 	public void browseSupport() {
 		if( log.isDebugEnabled() ) {
 			log.debug("[BROWSE SUPPORT]");

@@ -29,6 +29,7 @@ import java.util.Properties;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -114,6 +115,9 @@ public class MainViewController {
     Tab aboutTab;
     
     @FXML
+    Tab errorLogTab;
+    
+    @FXML
     Label aboutVersionLabel;
     
     @FXML
@@ -124,6 +128,9 @@ public class MainViewController {
     
     @FXML
     MenuItem miPaste;
+    
+    @FXML
+    CheckMenuItem miErrorLog;
     
     @FXML
     Button tbCut;
@@ -140,11 +147,27 @@ public class MainViewController {
     @FXML
     Button tbUpdate;
     
+    @FXML
+    Button tbClear;
+    
+    @FXML
+    TableView<ErrorLogEntry> tblErrors;
+    
+    @FXML
+    TableColumn<ErrorLogEntry, String> tcTime;
+    
+    @FXML
+    TableColumn<ErrorLogEntry, String> tcFile;
+    
+    @FXML
+    TableColumn<ErrorLogEntry, String> tcMessage;
+    
     AlertController alertController;
     DocumentBuilderFactory factory;
     MenuBarDelegate menuBarDelegate;
     AboutDelegate aboutDelegate;
     ToolBarDelegate toolBarDelegate;
+    ErrorLogDelegate errorLogDelegate;
     
     public MainViewController() {
     	
@@ -158,6 +181,7 @@ public class MainViewController {
         aboutDelegate = new AboutDelegate();
         menuBarDelegate = new MenuBarDelegate();
         toolBarDelegate = new ToolBarDelegate();
+        errorLogDelegate = new ErrorLogDelegate();
     }
 
     @FXML
@@ -182,7 +206,19 @@ public class MainViewController {
         );
         tcParentVersion.setCellFactory(new WarningCellFactory());
 
-    	PropertiesFileDAO propertiesFileDAO = new PropertiesFileDAO();
+        tcTime.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("logTime")
+        );
+
+        tcFile.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("fileName")
+        );
+
+        tcMessage.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("message")
+        );
+
+        PropertiesFileDAO propertiesFileDAO = new PropertiesFileDAO();
     	Properties appProperties = propertiesFileDAO.getProperties();
     	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
@@ -201,6 +237,11 @@ public class MainViewController {
     	Image updateImage = new Image("images/update32.png");
     	tbUpdate.setGraphic(new ImageView(updateImage));
     	
+    	Image clearImage = new Image("images/clear32.png");
+    	tbClear.setGraphic( new ImageView(clearImage));
+    	
+    	errorLogTab.setOnSelectionChanged(event -> tbClear.setDisable( !errorLogTab.isSelected() ) );
+    	
     	//
         // wire up delegates
         //
@@ -213,6 +254,7 @@ public class MainViewController {
         menuBarDelegate.tabPane = tabPane;
         menuBarDelegate.homeTab = homeTab;
         menuBarDelegate.aboutTab = aboutTab;
+        menuBarDelegate.errorLogTab = errorLogTab;
         menuBarDelegate.supportURL = appProperties.getProperty(AppPropertiesKeys.SUPPORT_URL);
         menuBarDelegate.licenseURL = appProperties.getProperty(AppPropertiesKeys.LICENSE_URL);
         menuBarDelegate.miCut = miCut;
@@ -229,11 +271,17 @@ public class MainViewController {
         toolBarDelegate.tfNewVersion = tfNewVersion;
         toolBarDelegate.tfRootDir = tfRootDir;
 
+        errorLogDelegate.tabPane = tabPane;
+        errorLogDelegate.errorLogTab = errorLogTab;
+        errorLogDelegate.tblErrors = tblErrors;
+        errorLogDelegate.miErrorLog = miErrorLog;
+        
         //
         // initialize delegates
         //
         aboutDelegate.init();
         toolBarDelegate.init();
+        errorLogDelegate.init();
     }
     
     @FXML
@@ -336,6 +384,9 @@ public class MainViewController {
 
         } catch(Exception exc) {
         	log.error( "error parsing path=" + path, exc );
+        	
+        	errorLogDelegate.log( path, exc.getMessage() );
+        	
             return new POMObject(path, "Parse Error (will be skipped)", "Parse Error (will be skipped)", true);
         }
     }
@@ -497,6 +548,16 @@ public class MainViewController {
     }
     
     @FXML
+    public void showOrHideErrorLog(ActionEvent evt) {
+    	CheckMenuItem mi = (CheckMenuItem)evt.getSource();
+    	if( mi.isSelected() ) {
+    		menuBarDelegate.showErrorLog();
+    	} else {
+    		menuBarDelegate.hideErrorLog();
+    	}
+    }
+
+    @FXML
     public void browseSupport() {
     	menuBarDelegate.browseSupport();
     }
@@ -564,8 +625,14 @@ public class MainViewController {
     	
     }
     
-    // release w. a selection -> something selected for cut and copy
+    @FXML
+    public void closingErrorLogTab() {
+    	errorLogDelegate.closingTab();
+    }
     
-    // release w/o a selection -> no selection; potential target of paste
+    @FXML
+    public void clearErrorLog() {
+    	errorLogDelegate.clearTable();
+    }
 }
 
