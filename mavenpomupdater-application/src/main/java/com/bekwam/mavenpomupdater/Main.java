@@ -29,10 +29,15 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.bekwam.mavenpomupdater.data.FavoritesDAO;
 
 /**
  * Main entry point for MPU
@@ -50,26 +55,45 @@ public class Main extends Application {
 	private Log log = LogFactory.getLog(Main.class);
 	
 	PropertiesFileDAO versionFileDAO;
+	FavoritesDAO favoritesDAO;
 	
     @Override
     public void start(Stage primaryStage) throws Exception{
     	
-    	primaryStage.getIcons().add(
-    			new Image("images/mpu_icon_64.png")
-    			);
-    	
+    	//
+    	// handle command line options
+    	//
     	Application.Parameters params = getParameters();
     	
     	List<String> unnamedList = params.getUnnamed();
-    	
-    	if( log.isDebugEnabled() ) {
-    		for( String arg : unnamedList ) {
-    			log.debug("received arg " + arg);
-    		}
-    	}
 
-    	final StackPane sp = new StackPane();
+    	Options options = new Options();
+		options.addOption( "help", false, "Print this message");
+		options.addOption( "hidpi", false, "Use high-DPI scaling");
+		
+		CommandLineParser p = new BasicParser();
+		CommandLine cmd = p.parse(options, unnamedList.toArray(new String[0]));
+		
+		HelpFormatter formatter = new HelpFormatter();
+		
+		if( cmd.hasOption("help") ) {
+			if( log.isDebugEnabled() ) {
+				log.debug("[START] running as help command");
+			}
+			formatter.printHelp( "Main", options );
+			return;
+		}
+
+		//
+		// setup icons
+		//
+		primaryStage.getIcons().add(
+    			new Image("images/mpu_icon_64.png")
+    			);
     	
+		//
+		// load fxml and wire controllers
+		//
     	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource("mavenpomupdater.fxml"));
     	Parent mainView = (Parent)mainViewLoader.load();
     	MainViewController mainViewController = mainViewLoader.getController();
@@ -83,6 +107,10 @@ public class Main extends Application {
     	
         mainView.getStyleClass().add("main-view-pane");
         
+        //
+        // add FlowPane, StackPane objects (defined in program and outside of 
+        // FXML)
+        //
         final FlowPane fp = new FlowPane();
         fp.setAlignment(Pos.CENTER);
         fp.getChildren().add( alertView );
@@ -90,11 +118,13 @@ public class Main extends Application {
         
         alertView.getStyleClass().add("alert-pane");
         
+    	final StackPane sp = new StackPane();    	
         sp.getChildren().add( fp );  // initially hide the alert
         sp.getChildren().add( mainView );
         
-        primaryStage.setTitle("Maven POM Version Updater");
-        
+        //
+        // setup scene
+        //
         Scene scene = new Scene(sp);
         scene.getStylesheets().add("com/bekwam/mavenpomupdater/mpu.css");
         
@@ -109,10 +139,13 @@ public class Main extends Application {
                 }
         	});
         
+        //
+        // setup stage
+        //
+        primaryStage.setTitle("Maven POM Version Updater");
         primaryStage.setScene(scene);
         
-    	if( CollectionUtils.isNotEmpty(unnamedList) 
-    			&& StringUtils.equalsIgnoreCase(unnamedList.get(0), "hidpi") ) {
+    	if( cmd.hasOption("hidpi") ) {
     		
     		if( log.isInfoEnabled() ) {
     			log.info("running in Hi-DPI display mode");
@@ -133,7 +166,6 @@ public class Main extends Application {
     	
         primaryStage.show();
     }
-
 
     public static void main(String[] args) {
         launch(args);

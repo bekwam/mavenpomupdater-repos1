@@ -30,6 +30,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -47,6 +48,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
+import javax.jnlp.ServiceManager;
+import javax.jnlp.UnavailableServiceException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -65,6 +68,10 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.bekwam.mavenpomupdater.data.FavoritesDAO;
+import com.bekwam.mavenpomupdater.data.FavoritesJNLPPersistenceServiceDAO;
+import com.bekwam.mavenpomupdater.data.FavoritesMemoryDAO;
+
 /**
  * Controller to support the main screen of MPU
  * 
@@ -82,7 +89,7 @@ public class MainViewController {
 	GridPane gp; // for hi-dpi treatment
 	
     @FXML
-    TextField tfRootDir;
+    ComboBox<String> cbRootDir;
 
     @FXML
     TextField tfFilters;
@@ -169,6 +176,10 @@ public class MainViewController {
     ToolBarDelegate toolBarDelegate;
     ErrorLogDelegate errorLogDelegate;
     
+    FavoritesDAO favoritesDAO;
+    
+    TextField tfRootDir;
+    
     public MainViewController() {
     	
     	if( log.isDebugEnabled() ) {
@@ -243,6 +254,13 @@ public class MainViewController {
     	errorLogTab.setOnSelectionChanged(event -> tbClear.setDisable( !errorLogTab.isSelected() ) );
     	
     	//
+    	// tfRootDir comes from a ComboBox that isn't readily accessible
+    	//
+    	
+    	tfRootDir = cbRootDir.editorProperty().get();
+    	tfRootDir.setOnMouseReleased( event -> { toolBarMouseReleased(event); });
+    	
+    	//
         // wire up delegates
         //
         aboutDelegate.imageView = aboutImageView;
@@ -282,6 +300,35 @@ public class MainViewController {
         aboutDelegate.init();
         toolBarDelegate.init();
         errorLogDelegate.init();
+        
+    	if( runningAsJNLP() ) {
+    		
+    		if( log.isInfoEnabled() ) {
+    			log.info("using jnlp favorites store");
+    		}
+    		favoritesDAO = new FavoritesJNLPPersistenceServiceDAO();
+    	} else {
+    		
+    		if( log.isInfoEnabled() ) {
+    			log.info("using in-memory favorites store");
+    		}
+        	favoritesDAO = new FavoritesMemoryDAO();
+    	}
+
+        favoritesDAO.init();
+        
+        List<String> favorites = favoritesDAO.findAllFavoriteRootDirs();
+        
+        cbRootDir.getItems().addAll( favorites );        
+    }
+    
+    private boolean runningAsJNLP() {
+    	try {
+    		ServiceManager.lookup("javax.jnlp.BasicService"); 
+    		return true;
+    	} catch(UnavailableServiceException exc) {
+    		return false;
+    	}
     }
     
     @FXML
@@ -299,7 +346,6 @@ public class MainViewController {
 
         File dir = dirChooser.showDialog(w);
         if (dir != null) {
-            System.out.println("dir=" + dir.getAbsolutePath());
             tfRootDir.setText( dir.getAbsolutePath() );
         }
     }
@@ -320,6 +366,15 @@ public class MainViewController {
         	alertController.setNotificationDialog("Project Root Is Empty", "A root directory must be specified in order to scan.");
         	vbox.toBack();  // bring up the alert view
         	return;
+        }
+        
+        //
+        // record the rootDir as a favorite (if needed)
+        //
+        favoritesDAO.addFavoriteRootDir(rootDir);
+        
+        if( !cbRootDir.getItems().contains(rootDir) ) {
+        	cbRootDir.getItems().add(rootDir);
         }
         
         String filtersCSV = tfFilters.getText();
@@ -343,6 +398,10 @@ public class MainViewController {
             POMObject pomObject = parseFile( path );
             tblPOMS.getItems().add( pomObject );
         }
+        
+        //
+        // Save rootDir as a favorite (if not done already)
+        //
     }
 
     @SuppressWarnings("unused")

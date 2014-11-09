@@ -99,13 +99,14 @@
                           </rowConstraints>
                            <children>
                               <Label text="Project Root" />
-                              <TextField fx:id="tfRootDir" onMouseReleased="#toolBarMouseReleased" prefHeight="65.0" prefWidth="736.0" GridPane.columnIndex="1">
+                              <ComboBox fx:id="cbRootDir" editable="true" prefWidth="626.0" GridPane.columnIndex="1">
                                  <tooltip>
                                     <Tooltip text="Recursively search directory for POMs" />
                                  </tooltip>
                                  <GridPane.margin>
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </GridPane.margin></TextField>
+                                 </GridPane.margin>
+                              </ComboBox>
                               <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2" />
                               <TextField fx:id="tfFilters" onMouseReleased="#toolBarMouseReleased" prefHeight="65.0" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <tooltip>
