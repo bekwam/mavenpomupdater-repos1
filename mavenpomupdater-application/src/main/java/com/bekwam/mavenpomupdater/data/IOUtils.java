@@ -53,7 +53,7 @@ public class IOUtils {
         OutputStream os = null;
         Properties properties = new Properties();
         try {
-        	fc.getOutputStream(false); 
+        	os = fc.getOutputStream(true);  // true -> overwrite 
         	properties.put(key, value);
         	properties.store( os, comment );
         } finally {

@@ -15,8 +15,6 @@
  */
 package com.bekwam.mavenpomupdater.data;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,6 +28,7 @@ import javax.jnlp.PersistenceService;
 import javax.jnlp.ServiceManager;
 import javax.jnlp.UnavailableServiceException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,6 +38,7 @@ public class FavoritesJNLPPersistenceServiceDAO implements FavoritesDAO {
 
 	private Log log = LogFactory.getLog( FavoritesJNLPPersistenceServiceDAO.class );
 	
+	private final int FC_MAX_SIZE = 100000;
 	private final static String KEY_FAVORITES_CSV = "favoritesCSV";
 	
 	PersistenceService ps; 
@@ -88,14 +88,14 @@ public class FavoritesJNLPPersistenceServiceDAO implements FavoritesDAO {
 		    	// Ex, getNames(codebase) -> { codebase, codebase + "/app2" };
 		    	//
 	        	String [] muffins = ps.getNames(codebase); 
-
+	        	
         		if( muffins == null || muffins.length == 0 ) {
         			
         			if( log.isDebugEnabled() ) {
         				log.debug("[ADD FAV] creating new datastore for codebase=" + codebase);
         			}
         			
-	        		ps.create(codebase, 100000); 
+	        		ps.create(codebase, FC_MAX_SIZE); 
 	        		
 	        		//
 	        		// Can either be CACHED (default), DIRTY, or TEMPORARY
@@ -103,7 +103,7 @@ public class FavoritesJNLPPersistenceServiceDAO implements FavoritesDAO {
 	        		// Since there's no server-side component, using TEMPORARY
 	        		//
 	        		
-	        		//ps.setTag(codebase, PersistenceService.TEMPORARY);
+	        		ps.setTag(codebase, PersistenceService.TEMPORARY);
 	        	} 
 	        	
             	FileContents fc = ps.get(codebase); 
@@ -163,58 +163,65 @@ public class FavoritesJNLPPersistenceServiceDAO implements FavoritesDAO {
 	        	
 	            URL codebase = bs.getCodeBase(); 
 	           
-	            String [] muffins = ps.getNames(codebase); 
+	            String[] muffins_a = ps.getNames(codebase);
+	            
+	            if( log.isDebugEnabled() ) {
+	            	for( String s : muffins_a ) {
+	            		log.debug("[FIND ALL] m_a=" + s);
+	            	}
+	            }
+
+	            List<String> muffins = Arrays.asList(ps.getNames(codebase)); 
 
 	            if( log.isDebugEnabled() ) {
-	            	log.debug("[FIND ALL] codebase=" + codebase + ", muffins empty?=" + (muffins==null||muffins.length==0));
+	            	log.debug("[FIND ALL] codebase=" + codebase + ", muffins empty?=" + (CollectionUtils.isEmpty(muffins)));
 	            }
 	            
-	            // get the attributes (tags) for each of these muffins. 
-	            // update the server's copy of the data if any muffins 
-	            // are dirty 
-	            int [] tags = new int[muffins.length]; 
-	            URL [] muffinURLs = new URL[muffins.length]; 
-	            for (int i = 0; i < muffins.length; i++) { 
-	            	
-	                muffinURLs[i] = new URL(codebase.toString() + muffins[i]); 
-	                
-	                tags[i] = ps.getTag(muffinURLs[i]); 
-	                if( log.isDebugEnabled() ) {
-	                	log.debug("[FIND ALL] m=" + muffinURLs[i] + ", tag=" + tags[i]);
-	                }
-	                
-	                // update the server if anything is tagged DIRTY 
-	                if (tags[i] == PersistenceService.DIRTY) { 
-	                    doUpdateServer(muffinURLs[i]); 
-	                } 
-	            } 
+	            List<URL> muffinURLs = new ArrayList<URL>();
+	            
+	            if( log.isDebugEnabled() ) {
+	            	for( String s : muffins ) {
+	            		log.debug("[FIND ALL] s=" + s);
+	            	}
+	            }
+	            
+				muffins.forEach(m -> {
+					try {
+						if( log.isDebugEnabled() ) {
+							log.debug("[FIND ALL] adding m=" + m);
+						}
+						muffinURLs.add( new URL(codebase + m) );
+					} catch(MalformedURLException exc) {
+						if( log.isInfoEnabled() ) {
+							log.info("[FIND ALL] can't create URL from " + m );
+						}
+					}
+				});
 
 	            //
-	            // Only expecting 1 muffin URL for now
+	            // Only expecting 1 muffin URL for now which is codebase
 	            //
 	            
-	            if( muffinURLs != null && muffinURLs.length > 0 ) {
+	            if( CollectionUtils.isNotEmpty(muffinURLs) ) {
 	            	
 	            	if( log.isDebugEnabled() ) {
 	            		log.debug("[FIND ALL] there are muffins to consult");
 	            	}
 	            	
-	            	FileContents fc = ps.get(muffinURLs[0]); 
+	            	FileContents fc = ps.get(muffinURLs.get(0) ); 
 	            	
-	            	InputStream is = fc.getInputStream(); 
-	            	Properties properties = new Properties();
-	            	properties.load( is );
+	            	Properties properties = ioUtils.getProperties(fc);
 	            	
 	            	String favoritesCSV = properties.getProperty(KEY_FAVORITES_CSV);
 	            	
 	            	if( StringUtils.isNotEmpty(favoritesCSV) ) {
+	            		
 	            		if( log.isDebugEnabled() ) {
 	            			log.debug("[FIND ALL] there is a favoritesCSV item=" + favoritesCSV);
 	            		}
+	            		
 	            		favorites = Arrays.asList( StringUtils.split(favoritesCSV, ","));
 	            	}
-	            	
-	            	is.close();
 	            }
 
 	        } catch (Exception exc ) { 
@@ -223,9 +230,5 @@ public class FavoritesJNLPPersistenceServiceDAO implements FavoritesDAO {
 	    } 
 	    
 		return favorites;
-	}
-	
-	private void doUpdateServer(URL url) throws MalformedURLException, IOException { 
-		ps.setTag(url, PersistenceService.CACHED); 
-	}
+	}	
 }
