@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.inject.Singleton;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -33,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * @author carlwalker
  * @since 1.1.0
  */
+@Singleton
 public class PropertiesFileDAO {
 
 	private Log log = LogFactory.getLog(PropertiesFileDAO.class);

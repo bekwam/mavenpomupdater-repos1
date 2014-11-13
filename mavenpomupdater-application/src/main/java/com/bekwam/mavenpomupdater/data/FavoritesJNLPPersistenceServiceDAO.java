@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
 import javax.jnlp.BasicService;
 import javax.jnlp.FileContents;
 import javax.jnlp.PersistenceService;
@@ -42,11 +43,12 @@ public class FavoritesJNLPPersistenceServiceDAO implements FavoritesDAO {
 	private final static String KEY_FAVORITES_CSV = "favoritesCSV";
 	
 	PersistenceService ps; 
-	BasicService bs; 
+	BasicService bs;
+	
+	@Inject
 	IOUtils ioUtils;
 	
 	public FavoritesJNLPPersistenceServiceDAO() {
-		ioUtils = new IOUtils();
 	}
 	
 	public void init() {

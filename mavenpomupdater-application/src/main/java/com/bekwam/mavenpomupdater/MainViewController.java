@@ -48,8 +48,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
-import javax.jnlp.ServiceManager;
-import javax.jnlp.UnavailableServiceException;
+import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -69,8 +68,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.bekwam.mavenpomupdater.data.FavoritesDAO;
-import com.bekwam.mavenpomupdater.data.FavoritesJNLPPersistenceServiceDAO;
-import com.bekwam.mavenpomupdater.data.FavoritesMemoryDAO;
 
 /**
  * Controller to support the main screen of MPU
@@ -169,16 +166,29 @@ public class MainViewController {
     @FXML
     TableColumn<ErrorLogEntry, String> tcMessage;
     
-    AlertController alertController;
-    DocumentBuilderFactory factory;
+    @Inject
     MenuBarDelegate menuBarDelegate;
+    
+    @Inject
     AboutDelegate aboutDelegate;
+    
+    @Inject
     ToolBarDelegate toolBarDelegate;
+    
+    @Inject
     ErrorLogDelegate errorLogDelegate;
     
+    @Inject
+    AlertController alertController;   
+    
+    @Inject
     FavoritesDAO favoritesDAO;
     
-    TextField tfRootDir;
+    @Inject
+    PropertiesFileDAO propertiesFileDAO;
+    
+    private DocumentBuilderFactory factory;    
+    private TextField tfRootDir;
     
     public MainViewController() {
     	
@@ -187,12 +197,7 @@ public class MainViewController {
     	}
     	
         factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(false);
-        
-        aboutDelegate = new AboutDelegate();
-        menuBarDelegate = new MenuBarDelegate();
-        toolBarDelegate = new ToolBarDelegate();
-        errorLogDelegate = new ErrorLogDelegate();
+        factory.setNamespaceAware(false);        
     }
 
     @FXML
@@ -201,6 +206,8 @@ public class MainViewController {
     	if( log.isDebugEnabled() ) {
     		log.debug("[INIT]");
     	}
+
+    	vbox.getStyleClass().add("main-view-pane");
 
         tcPath.setCellValueFactory(
                 new PropertyValueFactory<POMObject, String>("absPath")
@@ -229,7 +236,6 @@ public class MainViewController {
                 new PropertyValueFactory<ErrorLogEntry, String>("message")
         );
 
-        PropertiesFileDAO propertiesFileDAO = new PropertiesFileDAO();
     	Properties appProperties = propertiesFileDAO.getProperties();
     	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
@@ -301,34 +307,11 @@ public class MainViewController {
         toolBarDelegate.init();
         errorLogDelegate.init();
         
-    	if( runningAsJNLP() ) {
-    		
-    		if( log.isInfoEnabled() ) {
-    			log.info("using jnlp favorites store");
-    		}
-    		favoritesDAO = new FavoritesJNLPPersistenceServiceDAO();
-    	} else {
-    		
-    		if( log.isInfoEnabled() ) {
-    			log.info("using in-memory favorites store");
-    		}
-        	favoritesDAO = new FavoritesMemoryDAO();
-    	}
-
         favoritesDAO.init();
         
         List<String> favorites = favoritesDAO.findAllFavoriteRootDirs();
         
         cbRootDir.getItems().addAll( favorites );        
-    }
-    
-    private boolean runningAsJNLP() {
-    	try {
-    		ServiceManager.lookup("javax.jnlp.BasicService"); 
-    		return true;
-    	} catch(UnavailableServiceException exc) {
-    		return false;
-    	}
     }
     
     @FXML
