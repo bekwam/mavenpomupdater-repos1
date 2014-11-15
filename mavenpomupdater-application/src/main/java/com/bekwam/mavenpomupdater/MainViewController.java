@@ -177,8 +177,10 @@ public class MainViewController {
     
     @Inject
     ErrorLogDelegate errorLogDelegate;
-    
-    @Inject
+
+    //
+    // will be manually wired
+    //
     AlertController alertController;   
     
     @Inject
