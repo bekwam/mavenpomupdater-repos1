@@ -78,13 +78,8 @@ public class ToolBarDelegate {
 		content.putString(lastSelectedText);
 		systemClipboard.setContent(content);
 		
-		String origText = lastFocusedTF.getText();
-		String firstPart = StringUtils.substring( origText, 0, lastSelectedRange.getStart() );
-		String lastPart = StringUtils.substring( origText, lastSelectedRange.getEnd(), StringUtils.length(origText) );
-		lastFocusedTF.setText( firstPart + lastPart );
-		
+		lastFocusedTF.deleteText( lastSelectedRange );
 		lastFocusedTF.positionCaret( lastSelectedRange.getStart() );
-
 	}
 	
 	public void copy() {
@@ -121,24 +116,15 @@ public class ToolBarDelegate {
 			log.debug("[PASTE] range start=" + lastSelectedRange.getStart() + ", end=" + lastSelectedRange.getEnd());
 		}
 		
-		String origText = lastFocusedTF.getText();
-		
 		int endPos = 0;
-		String updatedText = "";
-		String firstPart = StringUtils.substring( origText, 0, lastSelectedRange.getStart() );
-		String lastPart = StringUtils.substring( origText, lastSelectedRange.getEnd(), StringUtils.length(origText) );
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] first=" + firstPart + ", last=" + lastPart);
-		}
-		updatedText = firstPart + clipboardText + lastPart;
-		
 		if( lastSelectedRange.getStart() == lastSelectedRange.getEnd() ) {
 			endPos = lastSelectedRange.getEnd() + StringUtils.length(clipboardText);
 		} else {
 			endPos = lastSelectedRange.getStart() + StringUtils.length(clipboardText);
 		}
 		
-		lastFocusedTF.setText( updatedText );
+		lastFocusedTF.replaceText( lastSelectedRange, clipboardText );
+		lastFocusedTF.requestFocus();
 		lastFocusedTF.positionCaret( endPos );
 	}
 

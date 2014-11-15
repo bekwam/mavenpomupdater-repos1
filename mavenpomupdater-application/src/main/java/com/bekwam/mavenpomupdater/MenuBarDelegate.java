@@ -137,13 +137,7 @@ public class MenuBarDelegate {
 		systemClipboard.setContent(content);
 		
 		IndexRange range = focusedTF.getSelection();
-		String origText = focusedTF.getText();
-		String firstPart = StringUtils.substring( origText, 0, range.getStart() );
-		String lastPart = StringUtils.substring( origText, range.getEnd(), StringUtils.length(origText) );
-		focusedTF.setText( firstPart + lastPart );
-		
-		focusedTF.positionCaret( range.getStart() );
-
+		focusedTF.deleteText( range );		
 	}
 	
 	public void copy() {
@@ -184,25 +178,7 @@ public class MenuBarDelegate {
 			log.debug("[PASTE] range start=" + range.getStart() + ", end=" + range.getEnd());
 		}
 		
-		String origText = focusedTF.getText();
-		
-		int endPos = 0;
-		String updatedText = "";
-		String firstPart = StringUtils.substring( origText, 0, range.getStart() );
-		String lastPart = StringUtils.substring( origText, range.getEnd(), StringUtils.length(origText) );
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] first=" + firstPart + ", last=" + lastPart);
-		}
-		updatedText = firstPart + clipboardText + lastPart;
-		
-		if( range.getStart() == range.getEnd() ) {
-			endPos = range.getEnd() + StringUtils.length(clipboardText);
-		} else {
-			endPos = range.getStart() + StringUtils.length(clipboardText);
-		}
-		
-		focusedTF.setText( updatedText );
-		focusedTF.positionCaret( endPos );
+		focusedTF.replaceText( range, clipboardText );
 	}
 
 	private void adjustForEmptyClipboard() {
