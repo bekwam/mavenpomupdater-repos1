@@ -157,8 +157,6 @@ public class Main extends Application {
         fp.getChildren().add( alertView );
         fp.getStyleClass().add("alert-background-pane");
         
-        alertView.getStyleClass().add("alert-pane");
-        
     	final StackPane sp = new StackPane();    	
         sp.getChildren().add( fp );  // initially hide the alert
         sp.getChildren().add( mainView );

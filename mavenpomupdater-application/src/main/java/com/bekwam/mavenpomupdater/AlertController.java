@@ -64,6 +64,8 @@ public class AlertController {
 		if( log.isDebugEnabled() ) {
 			log.debug("[INIT]");
 		}
+		
+        gp.getStyleClass().add("alert-pane");
 	}
 
 	@FXML
