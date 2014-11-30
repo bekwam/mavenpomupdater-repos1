@@ -74,12 +74,7 @@ public class ToolBarDelegate {
 			log.debug("[CUT]");
 		}
 		
-		ClipboardContent content = new ClipboardContent();
-		content.putString(lastSelectedText);
-		systemClipboard.setContent(content);
-		
-		lastFocusedTF.deleteText( lastSelectedRange );
-		lastFocusedTF.positionCaret( lastSelectedRange.getStart() );
+		lastFocusedTF.cut();
 	}
 	
 	public void copy() {

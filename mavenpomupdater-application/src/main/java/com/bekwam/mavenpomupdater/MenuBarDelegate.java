@@ -130,29 +130,16 @@ public class MenuBarDelegate {
 		
 		TextField focusedTF = getFocusedTextField();
 
-		String text = focusedTF.getSelectedText();
-		
-		ClipboardContent content = new ClipboardContent();
-		content.putString(text);
-		systemClipboard.setContent(content);
-		
-		IndexRange range = focusedTF.getSelection();
-		focusedTF.deleteText( range );		
+		focusedTF.cut();
 	}
 	
 	public void copy() {
 		if( log.isDebugEnabled() ) {
 			log.debug("[COPY]");
 		}
-		String text = getSelectedText();
 		
-		if( log.isDebugEnabled() ) {
-			log.debug("[COPY] copied=" + text);
-		}
-		
-		ClipboardContent content = new ClipboardContent();
-		content.putString(text);
-		systemClipboard.setContent(content);
+		TextField focusedTF = getFocusedTextField();
+		focusedTF.paste();
 	}
 
 	public void paste() {
@@ -165,20 +152,9 @@ public class MenuBarDelegate {
 			return;
 		}
 		
-		String clipboardText = systemClipboard.getString();
-		
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] pasting clipboard text=" + clipboardText);
-		}
-		
 		TextField focusedTF = getFocusedTextField();
-		IndexRange range = focusedTF.getSelection();
 		
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] range start=" + range.getStart() + ", end=" + range.getEnd());
-		}
-		
-		focusedTF.replaceText( range, clipboardText );
+		focusedTF.paste();
 	}
 
 	private void adjustForEmptyClipboard() {
