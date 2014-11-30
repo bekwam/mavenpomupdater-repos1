@@ -15,25 +15,15 @@
  */
 package com.bekwam.mavenpomupdater;
 
-import java.io.File;
+import com.bekwam.mavenpomupdater.data.FavoritesDAO;
+import com.bekwam.mavenpomupdater.data.FavoritesJNLPPersistenceServiceDAO;
+import com.google.inject.AbstractModule;
 
-import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+public class MPUJNLPModule extends AbstractModule {
 
-public class CSVFilenameFilterTest {
-
-	@Test
-	public void filterTargets() {
-		
-		File rootPath = new File("/Users/carlwalker/Desktop/git/repos1/css-impact/css-impact-application");
-		String pomFileName = "pom.xml";
-		String targetDirName = "target";
-
-		CSVFilenameFilter ff = new CSVFilenameFilter( "target" );
-		
-		assertTrue( ff.accept( rootPath, pomFileName ) );
-		assertFalse( ff.accept( rootPath, targetDirName ) );
+	@Override
+	protected void configure() {
+		bind(FavoritesDAO.class).to(FavoritesJNLPPersistenceServiceDAO.class).asEagerSingleton();
 	}
 
 }

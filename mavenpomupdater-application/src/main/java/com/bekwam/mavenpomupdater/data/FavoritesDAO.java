@@ -13,27 +13,15 @@
  * License for the specific language governing permissions and limitations 
  * under the License.
  */
-package com.bekwam.mavenpomupdater;
+package com.bekwam.mavenpomupdater.data;
 
-import java.io.File;
+import java.util.List;
 
-import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+public interface FavoritesDAO {
 
-public class CSVFilenameFilterTest {
+	void init();
 
-	@Test
-	public void filterTargets() {
-		
-		File rootPath = new File("/Users/carlwalker/Desktop/git/repos1/css-impact/css-impact-application");
-		String pomFileName = "pom.xml";
-		String targetDirName = "target";
-
-		CSVFilenameFilter ff = new CSVFilenameFilter( "target" );
-		
-		assertTrue( ff.accept( rootPath, pomFileName ) );
-		assertFalse( ff.accept( rootPath, targetDirName ) );
-	}
-
+	void addFavoriteRootDir(String favorite);
+	
+	public List<String> findAllFavoriteRootDirs();
 }

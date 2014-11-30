@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.bekwam</groupId>
 	<artifactId>mavenpomupdater</artifactId>
-	<version>1.1.0</version>
+	<version>1.2.0</version>
 
 	<dependencies>
 		<dependency>
@@ -25,6 +25,23 @@
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
 			<version>3.2.1</version>
+		</dependency>
+	    <dependency>
+    		<groupId>javax.jnlp</groupId>
+      		<artifactId>jnlp-api</artifactId>
+      		<version>7.0</version>
+      		<scope>system</scope>
+      		<systemPath>${java.home}/lib/javaws.jar</systemPath>
+    	</dependency>
+  		<dependency>
+   			<groupId>commons-cli</groupId>
+    		<artifactId>commons-cli</artifactId>
+    		<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>3.0</version>
 		</dependency>
 
 		<!-- test dependencies -->

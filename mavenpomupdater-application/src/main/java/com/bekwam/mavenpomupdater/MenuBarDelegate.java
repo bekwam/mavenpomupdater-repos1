@@ -1,15 +1,28 @@
+/*
+ * Copyright 2014 Bekwam, Inc 
+ * 
+ * Licensed under the Apache License, Version 2.0 (the “License”); you may not 
+ * use this file except in compliance with the License. You may obtain a copy 
+ * of the License at: 
+ * 
+ * 		http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations 
+ * under the License.
+ */
 package com.bekwam.mavenpomupdater;
 
 import java.net.URI;
 
 import javafx.application.Platform;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +42,7 @@ public class MenuBarDelegate {
 	TabPane tabPane;
 	Tab homeTab;
 	Tab aboutTab;
+	Tab errorLogTab;
 	String supportURL;
 	String licenseURL;
 	MenuItem miCut, miCopy, miPaste;
@@ -57,6 +71,32 @@ public class MenuBarDelegate {
 		tabPane.getSelectionModel().select(aboutTab);
 	}
 	
+	public void showErrorLog() {
+		
+		if( log.isDebugEnabled() ) {
+			log.debug("[SHOW ERROR LOG]");
+		}
+		
+		if( !tabPane.getTabs().contains( errorLogTab ) ) {
+			tabPane.getTabs().add( errorLogTab );
+		}
+		
+		tabPane.getSelectionModel().select(errorLogTab);
+	}
+
+	public void hideErrorLog() {
+		
+		if( log.isDebugEnabled() ) {
+			log.debug("[HIDE ERROR LOG]");
+		}
+		
+		if( tabPane.getTabs().contains( errorLogTab ) ) {
+			tabPane.getTabs().remove( errorLogTab );
+		}
+		
+		tabPane.getSelectionModel().select(homeTab);
+	}
+
 	public void browseSupport() {
 		if( log.isDebugEnabled() ) {
 			log.debug("[BROWSE SUPPORT]");
@@ -88,35 +128,16 @@ public class MenuBarDelegate {
 		
 		TextField focusedTF = getFocusedTextField();
 
-		String text = focusedTF.getSelectedText();
-		
-		ClipboardContent content = new ClipboardContent();
-		content.putString(text);
-		systemClipboard.setContent(content);
-		
-		IndexRange range = focusedTF.getSelection();
-		String origText = focusedTF.getText();
-		String firstPart = StringUtils.substring( origText, 0, range.getStart() );
-		String lastPart = StringUtils.substring( origText, range.getEnd(), StringUtils.length(origText) );
-		focusedTF.setText( firstPart + lastPart );
-		
-		focusedTF.positionCaret( range.getStart() );
-
+		focusedTF.cut();
 	}
 	
 	public void copy() {
 		if( log.isDebugEnabled() ) {
 			log.debug("[COPY]");
 		}
-		String text = getSelectedText();
 		
-		if( log.isDebugEnabled() ) {
-			log.debug("[COPY] copied=" + text);
-		}
-		
-		ClipboardContent content = new ClipboardContent();
-		content.putString(text);
-		systemClipboard.setContent(content);
+		TextField focusedTF = getFocusedTextField();
+		focusedTF.paste();
 	}
 
 	public void paste() {
@@ -129,38 +150,9 @@ public class MenuBarDelegate {
 			return;
 		}
 		
-		String clipboardText = systemClipboard.getString();
-		
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] pasting clipboard text=" + clipboardText);
-		}
-		
 		TextField focusedTF = getFocusedTextField();
-		IndexRange range = focusedTF.getSelection();
 		
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] range start=" + range.getStart() + ", end=" + range.getEnd());
-		}
-		
-		String origText = focusedTF.getText();
-		
-		int endPos = 0;
-		String updatedText = "";
-		String firstPart = StringUtils.substring( origText, 0, range.getStart() );
-		String lastPart = StringUtils.substring( origText, range.getEnd(), StringUtils.length(origText) );
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] first=" + firstPart + ", last=" + lastPart);
-		}
-		updatedText = firstPart + clipboardText + lastPart;
-		
-		if( range.getStart() == range.getEnd() ) {
-			endPos = range.getEnd() + StringUtils.length(clipboardText);
-		} else {
-			endPos = range.getStart() + StringUtils.length(clipboardText);
-		}
-		
-		focusedTF.setText( updatedText );
-		focusedTF.positionCaret( endPos );
+		focusedTF.paste();
 	}
 
 	private void adjustForEmptyClipboard() {
@@ -242,16 +234,6 @@ public class MenuBarDelegate {
 			}
 		}
 		return false;
-	}
-	
-	private String getSelectedText() {
-		TextField[] tfs = new TextField[] { tfNewVersion, tfFilters, tfRootDir };
-		for( TextField tf : tfs ) {
-			if( StringUtils.isNotEmpty(tf.getSelectedText() ) ) {
-				return tf.getSelectedText();
-			}
-		}
-		return null;
 	}
 	
 	private TextField getFocusedTextField() {

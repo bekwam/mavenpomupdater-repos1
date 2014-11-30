@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Bekwam, Inc 
+ * 
+ * Licensed under the Apache License, Version 2.0 (the “License”); you may not 
+ * use this file except in compliance with the License. You may obtain a copy 
+ * of the License at: 
+ * 
+ * 		http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations 
+ * under the License.
+ */
 package com.bekwam.mavenpomupdater;
 
 import javafx.scene.control.Button;
@@ -59,17 +74,7 @@ public class ToolBarDelegate {
 			log.debug("[CUT]");
 		}
 		
-		ClipboardContent content = new ClipboardContent();
-		content.putString(lastSelectedText);
-		systemClipboard.setContent(content);
-		
-		String origText = lastFocusedTF.getText();
-		String firstPart = StringUtils.substring( origText, 0, lastSelectedRange.getStart() );
-		String lastPart = StringUtils.substring( origText, lastSelectedRange.getEnd(), StringUtils.length(origText) );
-		lastFocusedTF.setText( firstPart + lastPart );
-		
-		lastFocusedTF.positionCaret( lastSelectedRange.getStart() );
-
+		lastFocusedTF.cut();
 	}
 	
 	public void copy() {
@@ -106,24 +111,15 @@ public class ToolBarDelegate {
 			log.debug("[PASTE] range start=" + lastSelectedRange.getStart() + ", end=" + lastSelectedRange.getEnd());
 		}
 		
-		String origText = lastFocusedTF.getText();
-		
 		int endPos = 0;
-		String updatedText = "";
-		String firstPart = StringUtils.substring( origText, 0, lastSelectedRange.getStart() );
-		String lastPart = StringUtils.substring( origText, lastSelectedRange.getEnd(), StringUtils.length(origText) );
-		if( log.isDebugEnabled() ) {
-			log.debug("[PASTE] first=" + firstPart + ", last=" + lastPart);
-		}
-		updatedText = firstPart + clipboardText + lastPart;
-		
 		if( lastSelectedRange.getStart() == lastSelectedRange.getEnd() ) {
 			endPos = lastSelectedRange.getEnd() + StringUtils.length(clipboardText);
 		} else {
 			endPos = lastSelectedRange.getStart() + StringUtils.length(clipboardText);
 		}
 		
-		lastFocusedTF.setText( updatedText );
+		lastFocusedTF.replaceText( lastSelectedRange, clipboardText );
+		lastFocusedTF.requestFocus();
 		lastFocusedTF.positionCaret( endPos );
 	}
 

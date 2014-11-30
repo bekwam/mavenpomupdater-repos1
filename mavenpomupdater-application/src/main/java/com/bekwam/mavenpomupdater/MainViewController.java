@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Bekwam, Inc 
+ * 
+ * Licensed under the Apache License, Version 2.0 (the “License”); you may not 
+ * use this file except in compliance with the License. You may obtain a copy 
+ * of the License at: 
+ * 
+ * 		http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations 
+ * under the License.
+ */
 package com.bekwam.mavenpomupdater;
 
 import java.io.File;
@@ -14,6 +29,8 @@ import java.util.Properties;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -31,6 +48,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
+import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -49,6 +67,8 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.bekwam.mavenpomupdater.data.FavoritesDAO;
+
 /**
  * Controller to support the main screen of MPU
  * 
@@ -66,7 +86,7 @@ public class MainViewController {
 	GridPane gp; // for hi-dpi treatment
 	
     @FXML
-    TextField tfRootDir;
+    ComboBox<String> cbRootDir;
 
     @FXML
     TextField tfFilters;
@@ -99,6 +119,9 @@ public class MainViewController {
     Tab aboutTab;
     
     @FXML
+    Tab errorLogTab;
+    
+    @FXML
     Label aboutVersionLabel;
     
     @FXML
@@ -111,6 +134,9 @@ public class MainViewController {
     MenuItem miPaste;
     
     @FXML
+    CheckMenuItem miErrorLog;
+    
+    @FXML
     Button tbCut;
     
     @FXML
@@ -119,11 +145,52 @@ public class MainViewController {
     @FXML
     Button tbPaste;
     
-    AlertController alertController;
-    DocumentBuilderFactory factory;
+    @FXML
+    Button tbScan;
+    
+    @FXML
+    Button tbUpdate;
+    
+    @FXML
+    Button tbClear;
+    
+    @FXML
+    TableView<ErrorLogEntry> tblErrors;
+    
+    @FXML
+    TableColumn<ErrorLogEntry, String> tcTime;
+    
+    @FXML
+    TableColumn<ErrorLogEntry, String> tcFile;
+    
+    @FXML
+    TableColumn<ErrorLogEntry, String> tcMessage;
+    
+    @Inject
     MenuBarDelegate menuBarDelegate;
+    
+    @Inject
     AboutDelegate aboutDelegate;
+    
+    @Inject
     ToolBarDelegate toolBarDelegate;
+    
+    @Inject
+    ErrorLogDelegate errorLogDelegate;
+
+    //
+    // will be manually wired
+    //
+    AlertController alertController;   
+    
+    @Inject
+    FavoritesDAO favoritesDAO;
+    
+    @Inject
+    PropertiesFileDAO propertiesFileDAO;
+    
+    private DocumentBuilderFactory factory;    
+    private TextField tfRootDir;
     
     public MainViewController() {
     	
@@ -132,11 +199,7 @@ public class MainViewController {
     	}
     	
         factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(false);
-        
-        aboutDelegate = new AboutDelegate();
-        menuBarDelegate = new MenuBarDelegate();
-        toolBarDelegate = new ToolBarDelegate();
+        factory.setNamespaceAware(false);        
     }
 
     @FXML
@@ -145,6 +208,8 @@ public class MainViewController {
     	if( log.isDebugEnabled() ) {
     		log.debug("[INIT]");
     	}
+
+    	vbox.getStyleClass().add("main-view-pane");
 
         tcPath.setCellValueFactory(
                 new PropertyValueFactory<POMObject, String>("absPath")
@@ -161,7 +226,18 @@ public class MainViewController {
         );
         tcParentVersion.setCellFactory(new WarningCellFactory());
 
-    	PropertiesFileDAO propertiesFileDAO = new PropertiesFileDAO();
+        tcTime.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("logTime")
+        );
+
+        tcFile.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("fileName")
+        );
+
+        tcMessage.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("message")
+        );
+
     	Properties appProperties = propertiesFileDAO.getProperties();
     	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
@@ -174,6 +250,24 @@ public class MainViewController {
     	Image pasteImage = new Image("images/paste32.png");
     	tbPaste.setGraphic(new ImageView(pasteImage));
 
+    	Image scanImage = new Image("images/scan32.png");
+    	tbScan.setGraphic(new ImageView(scanImage));
+    	
+    	Image updateImage = new Image("images/update32.png");
+    	tbUpdate.setGraphic(new ImageView(updateImage));
+    	
+    	Image clearImage = new Image("images/clear32.png");
+    	tbClear.setGraphic( new ImageView(clearImage));
+    	
+    	errorLogTab.setOnSelectionChanged(event -> tbClear.setDisable( !errorLogTab.isSelected() ) );
+    	
+    	//
+    	// tfRootDir comes from a ComboBox that isn't readily accessible
+    	//
+    	
+    	tfRootDir = cbRootDir.editorProperty().get();
+    	tfRootDir.setOnMouseReleased( event -> { toolBarMouseReleased(event); });
+    	
     	//
         // wire up delegates
         //
@@ -186,6 +280,7 @@ public class MainViewController {
         menuBarDelegate.tabPane = tabPane;
         menuBarDelegate.homeTab = homeTab;
         menuBarDelegate.aboutTab = aboutTab;
+        menuBarDelegate.errorLogTab = errorLogTab;
         menuBarDelegate.supportURL = appProperties.getProperty(AppPropertiesKeys.SUPPORT_URL);
         menuBarDelegate.licenseURL = appProperties.getProperty(AppPropertiesKeys.LICENSE_URL);
         menuBarDelegate.miCut = miCut;
@@ -202,11 +297,23 @@ public class MainViewController {
         toolBarDelegate.tfNewVersion = tfNewVersion;
         toolBarDelegate.tfRootDir = tfRootDir;
 
+        errorLogDelegate.tabPane = tabPane;
+        errorLogDelegate.errorLogTab = errorLogTab;
+        errorLogDelegate.tblErrors = tblErrors;
+        errorLogDelegate.miErrorLog = miErrorLog;
+        
         //
         // initialize delegates
         //
         aboutDelegate.init();
         toolBarDelegate.init();
+        errorLogDelegate.init();
+        
+        favoritesDAO.init();
+        
+        List<String> favorites = favoritesDAO.findAllFavoriteRootDirs();
+        
+        cbRootDir.getItems().addAll( favorites );        
     }
     
     @FXML
@@ -224,7 +331,6 @@ public class MainViewController {
 
         File dir = dirChooser.showDialog(w);
         if (dir != null) {
-            System.out.println("dir=" + dir.getAbsolutePath());
             tfRootDir.setText( dir.getAbsolutePath() );
         }
     }
@@ -245,6 +351,15 @@ public class MainViewController {
         	alertController.setNotificationDialog("Project Root Is Empty", "A root directory must be specified in order to scan.");
         	vbox.toBack();  // bring up the alert view
         	return;
+        }
+        
+        //
+        // record the rootDir as a favorite (if needed)
+        //
+        favoritesDAO.addFavoriteRootDir(rootDir);
+        
+        if( !cbRootDir.getItems().contains(rootDir) ) {
+        	cbRootDir.getItems().add(rootDir);
         }
         
         String filtersCSV = tfFilters.getText();
@@ -268,6 +383,10 @@ public class MainViewController {
             POMObject pomObject = parseFile( path );
             tblPOMS.getItems().add( pomObject );
         }
+        
+        //
+        // Save rootDir as a favorite (if not done already)
+        //
     }
 
     @SuppressWarnings("unused")
@@ -309,6 +428,9 @@ public class MainViewController {
 
         } catch(Exception exc) {
         	log.error( "error parsing path=" + path, exc );
+        	
+        	errorLogDelegate.log( path, exc.getMessage() );
+        	
             return new POMObject(path, "Parse Error (will be skipped)", "Parse Error (will be skipped)", true);
         }
     }
@@ -365,84 +487,100 @@ public class MainViewController {
         	return;
         }
 
-        if( CollectionUtils.isEmpty(tblPOMS.getItems()) ) {
+        int npoms = CollectionUtils.size(tblPOMS.getItems());
+        if( npoms == 0 ) {
         	if( log.isDebugEnabled() ) {
         		log.debug("[UPDATE] tblPOMS is empty");
         	}
         	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a Project Root and press Scan.");
         	vbox.toBack();  // bring up the alert view
         	return;
-        }
-
-        for( POMObject p : tblPOMS.getItems() ) {
-
-        	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] p=" + p.getAbsPath());
-        	}
-
-        	if( p.getParseError() ) {
-        		if( log.isDebugEnabled() ) {
-        			log.debug("[UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
-        		}
-        		continue;
-        	}
-        	
-            try {
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setNamespaceAware(false);
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(p.getAbsPath());
-
-                if( p.getParentVersion() != null && p.getParentVersion().length() > 0 ) {
-                    XPath xpath = XPathFactory.newInstance().newXPath();
-                    XPathExpression expression = xpath.compile("//project/parent/version/text()");
-                    Node node = (Node) expression.evaluate( doc, XPathConstants.NODE);
-                    node.setNodeValue( tfNewVersion.getText() );
-                }
-
-                if( p.getVersion() != null && p.getVersion().length() > 0 ) {
-                    XPath xpath = XPathFactory.newInstance().newXPath();
-                    XPathExpression expression = xpath.compile("//project/version/text()");
-                    Node node = (Node) expression.evaluate(doc, XPathConstants.NODE);
-                    node.setNodeValue( tfNewVersion.getText() );
-                }
-
-                TransformerFactory tFactory =
-                        TransformerFactory.newInstance();
-                Transformer transformer = tFactory.newTransformer();
-
-                String workingFileName = p.getAbsPath() + ".mpu";
-                FileWriter fw = new FileWriter(workingFileName);
-                DOMSource source = new DOMSource(doc);
-                StreamResult result = new StreamResult(fw);
-                transformer.transform(source, result);
-                fw.close();
-
-                Path src = FileSystems.getDefault().getPath( workingFileName );
-                Path target = FileSystems.getDefault().getPath( p.getAbsPath() );
-
-                Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
-
-                Files.delete( src );
-
-            } catch(Exception exc) {
-            	log.error( "error updating poms", exc );
-            }
-        }
-        
-        if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
-        	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] issuing rescan command");
-        	}
-        	scan();
         } else {
+        	
         	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] did an update, but there is not value in root; clearing");
+        		log.debug("[UPDATE] confirming update operation");
         	}
-        	tblPOMS.getItems().clear();
+        	alertController.setConfirmationDialog(
+        			"Confirm Update", 
+        			"This wil update " + npoms + " POM files.  Continue?",
+        			mv -> mv.doUpdate()
+        			);
+        
+        	vbox.toBack();       	
         }
     }
     
+    public void doUpdate() {
+    	for( POMObject p : tblPOMS.getItems() ) {
+
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[DO UPDATE] p=" + p.getAbsPath());
+    	}
+
+    	if( p.getParseError() ) {
+    		if( log.isDebugEnabled() ) {
+    			log.debug("[DO UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
+    		}
+    		continue;
+    	}
+    	
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(p.getAbsPath());
+
+            if( p.getParentVersion() != null && p.getParentVersion().length() > 0 ) {
+                XPath xpath = XPathFactory.newInstance().newXPath();
+                XPathExpression expression = xpath.compile("//project/parent/version/text()");
+                Node node = (Node) expression.evaluate( doc, XPathConstants.NODE);
+                node.setNodeValue( tfNewVersion.getText() );
+            }
+
+            if( p.getVersion() != null && p.getVersion().length() > 0 ) {
+                XPath xpath = XPathFactory.newInstance().newXPath();
+                XPathExpression expression = xpath.compile("//project/version/text()");
+                Node node = (Node) expression.evaluate(doc, XPathConstants.NODE);
+                node.setNodeValue( tfNewVersion.getText() );
+            }
+
+            TransformerFactory tFactory =
+                    TransformerFactory.newInstance();
+            Transformer transformer = tFactory.newTransformer();
+
+            String workingFileName = p.getAbsPath() + ".mpu";
+            FileWriter fw = new FileWriter(workingFileName);
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(fw);
+            transformer.transform(source, result);
+            fw.close();
+
+            Path src = FileSystems.getDefault().getPath( workingFileName );
+            Path target = FileSystems.getDefault().getPath( p.getAbsPath() );
+
+            Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
+
+            Files.delete( src );
+
+        } catch(Exception exc) {
+        	log.error( "error updating poms", exc );
+        }
+    }
+    
+    if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[DO UPDATE] issuing rescan command");
+    	}
+    	scan();
+    } else {
+    	if( log.isDebugEnabled() ) {
+    		log.debug("[DO UPDATE] did an update, but there is not value in root; clearing");
+    	}
+    	tblPOMS.getItems().clear();
+    } 
+
+    }
+
     @FXML
     public void close() {
     	menuBarDelegate.close();
@@ -453,6 +591,16 @@ public class MainViewController {
     	menuBarDelegate.showAbout();
     }
     
+    @FXML
+    public void showOrHideErrorLog(ActionEvent evt) {
+    	CheckMenuItem mi = (CheckMenuItem)evt.getSource();
+    	if( mi.isSelected() ) {
+    		menuBarDelegate.showErrorLog();
+    	} else {
+    		menuBarDelegate.hideErrorLog();
+    	}
+    }
+
     @FXML
     public void browseSupport() {
     	menuBarDelegate.browseSupport();
@@ -521,8 +669,14 @@ public class MainViewController {
     	
     }
     
-    // release w. a selection -> something selected for cut and copy
+    @FXML
+    public void closingErrorLogTab() {
+    	errorLogDelegate.closingTab();
+    }
     
-    // release w/o a selection -> no selection; potential target of paste
+    @FXML
+    public void clearErrorLog() {
+    	errorLogDelegate.clearTable();
+    }
 }
 
