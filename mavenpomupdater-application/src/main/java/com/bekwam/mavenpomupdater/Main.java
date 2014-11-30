@@ -189,8 +189,10 @@ public class Main extends Application {
     		if( log.isInfoEnabled() ) {
     			log.info("running in Hi-DPI display mode");
     		}
-            primaryStage.setWidth(1920.0);
-            primaryStage.setHeight(1080.0);
+            primaryStage.setWidth(2560.0);
+            primaryStage.setHeight(1440.0);
+            primaryStage.setMinWidth(1920.0);
+            primaryStage.setMinHeight(1080.0);
             
             mainViewController.adjustForHiDPI();
             
