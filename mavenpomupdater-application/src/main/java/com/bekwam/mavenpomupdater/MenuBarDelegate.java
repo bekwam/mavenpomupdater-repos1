@@ -18,13 +18,11 @@ package com.bekwam.mavenpomupdater;
 import java.net.URI;
 
 import javafx.application.Platform;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 
 import org.apache.commons.lang3.StringUtils;
@@ -236,16 +234,6 @@ public class MenuBarDelegate {
 			}
 		}
 		return false;
-	}
-	
-	private String getSelectedText() {
-		TextField[] tfs = new TextField[] { tfNewVersion, tfFilters, tfRootDir };
-		for( TextField tf : tfs ) {
-			if( StringUtils.isNotEmpty(tf.getSelectedText() ) ) {
-				return tf.getSelectedText();
-			}
-		}
-		return null;
 	}
 	
 	private TextField getFocusedTextField() {
