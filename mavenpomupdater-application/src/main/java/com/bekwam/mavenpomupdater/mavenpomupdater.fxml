@@ -69,80 +69,86 @@
             <Button fx:id="tbClear" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#clearErrorLog" text="Clear" />
         </items>
       </ToolBar>
-      <TabPane fx:id="tabPane">
+      <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS">
          <tabs>
             <Tab fx:id="homeTab" closable="false" text="Home">
                <content>
-                  <VBox prefHeight="667.0" prefWidth="1270.0">
+                  <AnchorPane fx:id="ap" prefHeight="542.0" prefWidth="1222.0">
                      <children>
-                        <GridPane fx:id="gp" prefHeight="270.0">
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1032.0" minWidth="10.0" prefWidth="291.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1489.0" minWidth="10.0" prefWidth="677.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="966.0" minWidth="10.0" prefWidth="397.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints />
-                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-                              <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
-                          </rowConstraints>
+                        <VBox layoutX="10.0" layoutY="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <Label text="Project Root" />
-                              <ComboBox fx:id="cbRootDir" editable="true" prefWidth="626.0" GridPane.columnIndex="1">
-                                 <tooltip>
-                                    <Tooltip text="Recursively search directory for POMs" />
-                                 </tooltip>
-                                 <GridPane.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </GridPane.margin>
-                              </ComboBox>
-                              <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2" />
-                              <TextField fx:id="tfFilters" onMouseReleased="#toolBarMouseReleased" prefHeight="65.0" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                 <tooltip>
-                                    <Tooltip text="Comma-separated list of filter strings" />
-                                 </tooltip>
-                                 <GridPane.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </GridPane.margin></TextField>
-                              <Label text="Filters" GridPane.rowIndex="1" />
-                              <Label text="New Version" GridPane.rowIndex="2" />
-                              <TextField fx:id="tfNewVersion" onMouseReleased="#toolBarMouseReleased" prefHeight="65.0" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                 <tooltip>
-                                    <Tooltip text="Value to update POM parent version and version" />
-                                 </tooltip>
-                                 <GridPane.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </GridPane.margin></TextField>
-                              <Button mnemonicParsing="false" onAction="#update" text="Update" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                              <Button mnemonicParsing="false" onAction="#scan" text="Scan" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <GridPane fx:id="gp" maxHeight="-Infinity" maxWidth="-Infinity" VBox.vgrow="NEVER">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="1032.0" minWidth="10.0" prefWidth="291.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="1489.0" minWidth="10.0" prefWidth="677.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="966.0" minWidth="10.0" prefWidth="397.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                                    <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text="Project Root" />
+                                    <ComboBox fx:id="cbRootDir" editable="true" prefWidth="626.0" GridPane.columnIndex="1">
+                                       <tooltip>
+                                          <Tooltip text="Recursively search directory for POMs" />
+                                       </tooltip>
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </GridPane.margin>
+                                    </ComboBox>
+                                    <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2" />
+                                    <TextField fx:id="tfFilters" onMouseReleased="#toolBarMouseReleased" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <tooltip>
+                                          <Tooltip text="Comma-separated list of filter strings" />
+                                       </tooltip>
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <Label text="Filters" GridPane.rowIndex="1" />
+                                    <Label text="New Version" GridPane.rowIndex="2" />
+                                    <TextField fx:id="tfNewVersion" onMouseReleased="#toolBarMouseReleased" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <tooltip>
+                                          <Tooltip text="Value to update POM parent version and version" />
+                                       </tooltip>
+                                       <GridPane.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <Button mnemonicParsing="false" onAction="#update" text="Update" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                    <Button mnemonicParsing="false" onAction="#scan" text="Scan" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                 </children>
+                              </GridPane>
+                              <TableView fx:id="tblPOMS" layoutX="10.0" layoutY="100.0" VBox.vgrow="ALWAYS">
+                                <columns>
+                                  <TableColumn fx:id="tcPath" minWidth="-Infinity" prefWidth="620.0" text="Path" />
+                                    <TableColumn fx:id="tcVersion" minWidth="-Infinity" prefWidth="300.0" text="Version" />
+                                  <TableColumn fx:id="tcParentVersion" maxWidth="-1.0" minWidth="-Infinity" prefWidth="300.0" text="Parent" />
+                                </columns>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </TableView>
                            </children>
-                           <VBox.margin>
-                              <Insets bottom="10.0" />
-                           </VBox.margin>
-                        </GridPane>
-                        <TableView fx:id="tblPOMS" prefHeight="460.0" prefWidth="1170.0">
-                          <columns>
-                            <TableColumn fx:id="tcPath" minWidth="-Infinity" prefWidth="620.0" text="Path" />
-                              <TableColumn fx:id="tcVersion" minWidth="-Infinity" prefWidth="300.0" text="Version" />
-                            <TableColumn fx:id="tcParentVersion" minWidth="-Infinity" prefWidth="300.0" text="Parent" />
-                          </columns>
-                        </TableView>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </VBox>
                      </children>
-                     <padding>
-                        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-                     </padding>
-                  </VBox>
+                  </AnchorPane>
                </content>
             </Tab>
             <Tab fx:id="errorLogTab" onCloseRequest="#closingErrorLogTab" text="Error Log">

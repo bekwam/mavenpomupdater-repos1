@@ -43,7 +43,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
@@ -165,7 +167,10 @@ public class MainViewController {
     
     @FXML
     TableColumn<ErrorLogEntry, String> tcMessage;
-    
+
+    @FXML
+    AnchorPane ap;
+
     @Inject
     MenuBarDelegate menuBarDelegate;
     

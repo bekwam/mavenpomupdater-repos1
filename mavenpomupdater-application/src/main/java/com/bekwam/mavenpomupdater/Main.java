@@ -113,12 +113,7 @@ public class Main extends Application {
 		
 		BuilderFactory builderFactory = new JavaFXBuilderFactory();
 		
-		Callback<Class<?>, Object> guiceControllerFactory = new Callback<Class<?>, Object>() {
-			@Override
-			public Object call(Class<?> clazz) {
-				return injector.getInstance(clazz);
-			}
-		};
+		Callback<Class<?>, Object> guiceControllerFactory = clazz -> injector.getInstance(clazz);
 		
 		//
 		// setup icons
