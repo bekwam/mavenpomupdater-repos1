@@ -534,7 +534,7 @@ public class MainViewController {
         	if( log.isDebugEnabled() ) {
         		log.debug("[UPDATE] tblPOMS is empty");
         	}
-        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a Project Root and press Scan.");
+        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowse for a Project Root, press Scan, and select one or more poms.");
         	vbox.toBack();  // bring up the alert view
         	return;
         } else {
