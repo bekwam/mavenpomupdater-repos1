@@ -15,6 +15,7 @@
  */
 package com.bekwam.mavenpomupdater;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -26,6 +27,7 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class POMObject {
 
+    private final SimpleBooleanProperty update = new SimpleBooleanProperty();
     private final SimpleStringProperty absPath = new SimpleStringProperty();
     private final SimpleStringProperty version = new SimpleStringProperty();
     private final SimpleStringProperty parentVersion = new SimpleStringProperty();
@@ -33,12 +35,17 @@ public class POMObject {
     
     public POMObject() {}
 
-    public POMObject(String absPath, String version, String parentVersion, Boolean parseError) {
+    public POMObject(Boolean update, String absPath, String version, String parentVersion, Boolean parseError) {
+        this.update.set( update );
         this.absPath.set( absPath );
         this.version.set( version );
         this.parentVersion.set(parentVersion);
         this.parseError.set(parseError);
     }
+
+    public Boolean getUpdate() { return update.get(); }
+    public void setUpdate(Boolean _update) { update.set(_update); }
+    public BooleanProperty updateProperty() { return update; }
 
     public String getAbsPath() { return absPath.get(); }
     public void setAbsPath(String _absPath) {
@@ -62,7 +69,7 @@ public class POMObject {
 
 	@Override
 	public String toString() {
-		return "POMObject [absPath=" + absPath + ", version=" + version
+		return "POMObject [update=" + update + ", absPath=" + absPath + ", version=" + version
 				+ ", parentVersion=" + parentVersion + ", parseError="
 				+ parseError + "]";
 	}

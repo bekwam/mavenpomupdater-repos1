@@ -98,6 +98,7 @@
                                     <RowConstraints />
                                     <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
                                     <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+                                    <RowConstraints maxHeight="0.0" minHeight="10.0" prefHeight="30.0" />
                                 </rowConstraints>
                                  <children>
                                     <Label text="Project Root" />
@@ -132,14 +133,29 @@
                                     <Button mnemonicParsing="false" onAction="#scan" text="Scan" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                  </children>
                               </GridPane>
-                              <TableView fx:id="tblPOMS" layoutX="10.0" layoutY="100.0" VBox.vgrow="ALWAYS">
+                              <HBox VBox.vgrow="NEVER">
+                                 <children>
+                                    <Button fx:id="btnSelectAll" disable="true" mnemonicParsing="false" onAction="#selectAllTblPOMS" GridPane.rowIndex="3">
+                                       <tooltip>
+                                          <Tooltip text="Select all poms for update" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button fx:id="btnDeselectAll" disable="true" mnemonicParsing="false" onAction="#deSelectAllTblPOMS">
+                                       <tooltip>
+                                          <Tooltip text="De-select all poms for update" />
+                                       </tooltip>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="tblPOMS" editable="true" layoutX="10.0" layoutY="100.0" VBox.vgrow="ALWAYS">
                                 <columns>
+                                    <TableColumn fx:id="tcUpdate" prefWidth="75.0" text="Update" />
                                   <TableColumn fx:id="tcPath" minWidth="-Infinity" prefWidth="620.0" text="Path" />
                                     <TableColumn fx:id="tcVersion" minWidth="-Infinity" prefWidth="300.0" text="Version" />
-                                  <TableColumn fx:id="tcParentVersion" maxWidth="-1.0" minWidth="-Infinity" prefWidth="300.0" text="Parent" />
+                                  <TableColumn fx:id="tcParentVersion" minWidth="-Infinity" prefWidth="300.0" text="Parent" />
                                 </columns>
                                  <VBox.margin>
-                                    <Insets top="10.0" />
+                                    <Insets top="2.0" />
                                  </VBox.margin>
                               </TableView>
                            </children>
