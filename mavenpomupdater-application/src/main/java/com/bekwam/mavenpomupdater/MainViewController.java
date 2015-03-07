@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
@@ -41,6 +42,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -181,6 +183,9 @@ public class MainViewController {
     @FXML
     Button btnDeselectAll;
 
+    @FXML
+    Button btnLockUnlock;
+
     @Inject
     MenuBarDelegate menuBarDelegate;
     
@@ -206,7 +211,11 @@ public class MainViewController {
     
     private DocumentBuilderFactory factory;    
     private TextField tfRootDir;
-    
+    private Boolean tblPOMSLocked = true;
+    private Boolean tblPOMSDirty = false;
+    private ImageView lockImageView;
+    private ImageView unlockImageView;
+
     public MainViewController() {
     	
     	if( log.isDebugEnabled() ) {
@@ -226,65 +235,13 @@ public class MainViewController {
 
     	vbox.getStyleClass().add("main-view-pane");
 
-        tcPath.setCellValueFactory(
-                new PropertyValueFactory<POMObject, String>("absPath")
-        );
-        tcPath.setCellFactory(new WarningCellFactory());
-        
-        tcVersion.setCellValueFactory(
-                new PropertyValueFactory<POMObject, String>("version")
-        );
-        tcVersion.setCellFactory(new WarningCellFactory());
-
-        tcParentVersion.setCellValueFactory(
-               new PropertyValueFactory<POMObject, String>("parentVersion")
-        );
-        tcParentVersion.setCellFactory(new WarningCellFactory());
-
-        tcUpdate.setCellValueFactory(
-                new PropertyValueFactory<POMObject, Boolean>("update")
-        );
-        tcUpdate.setCellFactory(CheckBoxTableCell.forTableColumn(tcUpdate));
-
-        tcTime.setCellValueFactory(
-                new PropertyValueFactory<ErrorLogEntry, String>("logTime")
-        );
-
-        tcFile.setCellValueFactory(
-                new PropertyValueFactory<ErrorLogEntry, String>("fileName")
-        );
-
-        tcMessage.setCellValueFactory(
-                new PropertyValueFactory<ErrorLogEntry, String>("message")
-        );
+        initialTblPOMS();
 
 
     	Properties appProperties = propertiesFileDAO.getProperties();
     	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
-    	Image cutImage = new Image("images/cut32.png");
-    	tbCut.setGraphic(new ImageView(cutImage));
-    	
-    	Image copyImage = new Image("images/copy32.png");
-    	tbCopy.setGraphic(new ImageView(copyImage));
-
-    	Image pasteImage = new Image("images/paste32.png");
-    	tbPaste.setGraphic(new ImageView(pasteImage));
-
-    	Image scanImage = new Image("images/scan32.png");
-    	tbScan.setGraphic(new ImageView(scanImage));
-    	
-    	Image updateImage = new Image("images/update32.png");
-    	tbUpdate.setGraphic(new ImageView(updateImage));
-    	
-    	Image clearImage = new Image("images/clear32.png");
-    	tbClear.setGraphic( new ImageView(clearImage));
-
-        Image selImage = new Image("images/select16.png");
-        btnSelectAll.setGraphic( new ImageView(selImage) );
-
-        Image deselImage = new Image("images/deselect16.png");
-        btnDeselectAll.setGraphic( new ImageView(deselImage ) );
+        initializeButtonGraphics();
 
     	errorLogTab.setOnSelectionChanged(event -> tbClear.setDisable( !errorLogTab.isSelected() ) );
     	
@@ -342,7 +299,82 @@ public class MainViewController {
         
         cbRootDir.getItems().addAll( favorites );        
     }
-    
+
+    private void initialTblPOMS() {
+        tcPath.setCellValueFactory(
+                new PropertyValueFactory<POMObject, String>("absPath")
+        );
+        tcPath.setCellFactory(new WarningCellFactory());
+
+        tcVersion.setCellValueFactory(
+                new PropertyValueFactory<POMObject, String>("version")
+        );
+        tcVersion.setCellFactory(new WarningCellFactory());
+        tcVersion.setOnEditCommit(t -> {
+            tblPOMSDirty = true;
+            ((POMObject) t.getTableView().getItems().get(t.getTablePosition().getRow())).setVersion(t.getNewValue());
+        });
+
+        tcParentVersion.setCellValueFactory(
+               new PropertyValueFactory<POMObject, String>("parentVersion")
+        );
+        tcParentVersion.setCellFactory(new WarningCellFactory());
+        tcParentVersion.setOnEditCommit(t -> {
+            tblPOMSDirty = true;
+            ((POMObject) t.getTableView().getItems().get(t.getTablePosition().getRow())).setParentVersion(t.getNewValue());
+        });
+
+        tcUpdate.setCellValueFactory(
+                new PropertyValueFactory<POMObject, Boolean>("update")
+        );
+        tcUpdate.setCellFactory(CheckBoxTableCell.forTableColumn(tcUpdate));
+
+        tcTime.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("logTime")
+        );
+
+        tcFile.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("fileName")
+        );
+
+        tcMessage.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("message")
+        );
+    }
+
+    private void initializeButtonGraphics() {
+        Image cutImage = new Image("images/cut32.png");
+        tbCut.setGraphic(new ImageView(cutImage));
+
+        Image copyImage = new Image("images/copy32.png");
+        tbCopy.setGraphic(new ImageView(copyImage));
+
+        Image pasteImage = new Image("images/paste32.png");
+        tbPaste.setGraphic(new ImageView(pasteImage));
+
+        Image scanImage = new Image("images/scan32.png");
+        tbScan.setGraphic(new ImageView(scanImage));
+
+        Image updateImage = new Image("images/update32.png");
+        tbUpdate.setGraphic(new ImageView(updateImage));
+
+        Image clearImage = new Image("images/clear32.png");
+        tbClear.setGraphic( new ImageView(clearImage));
+
+        Image selImage = new Image("images/select16.png");
+        btnSelectAll.setGraphic( new ImageView(selImage) );
+
+        Image deselImage = new Image("images/deselect16.png");
+        btnDeselectAll.setGraphic( new ImageView(deselImage ) );
+
+        Image lockImage = new Image("images/lock16.png");
+        lockImageView = new ImageView(lockImage);
+
+        Image unlockImage = new Image("images/unlock16.png");
+        unlockImageView = new ImageView(unlockImage);
+        btnLockUnlock.setGraphic(unlockImageView);
+    }
+
     @FXML
     public void selectFile(ActionEvent evt) {
     	
@@ -384,7 +416,12 @@ public class MainViewController {
             btnDeselectAll.setDisable( true );
             btnSelectAll.setDisable( true );
 
-        	return;
+            lockTblPOMS();
+            btnLockUnlock.setDisable( true );
+
+            tfNewVersion.setDisable( false );
+
+            return;
         }
         
         //
@@ -416,6 +453,11 @@ public class MainViewController {
             btnDeselectAll.setDisable( true );
             btnSelectAll.setDisable( true );
 
+            lockTblPOMS();
+            btnLockUnlock.setDisable(true);
+
+            tfNewVersion.setDisable( false );
+
             return;
         }
 
@@ -430,6 +472,14 @@ public class MainViewController {
         //
         btnDeselectAll.setDisable( false );
         btnSelectAll.setDisable(false);
+
+        //
+        // Activate the lock/unlock button
+        //
+        lockTblPOMS();  // reset lock state
+        btnLockUnlock.setDisable(false);
+        tblPOMSDirty = false;
+        tfNewVersion.setDisable( false );
     }
 
 	private POMObject parseFile(String path) {
@@ -520,9 +570,9 @@ public class MainViewController {
     	}
 
     	String newVersion = tfNewVersion.getText();
-        if( StringUtils.isEmpty(newVersion) ) {
+        if( StringUtils.isEmpty(newVersion) && !tblPOMSDirty ) {
         	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] newVersion is empty");
+        		log.debug("[UPDATE] newVersion is empty and not manually editing the table");
         	}
         	alertController.setNotificationDialog("No Version Specified", "Please specify a version.");
         	vbox.toBack();  // bring up the alert view
@@ -553,6 +603,7 @@ public class MainViewController {
     }
     
     public void doUpdate() {
+
     	for( POMObject p : tblPOMS.getItems() ) {
 
     	    if( log.isDebugEnabled() ) {
@@ -566,7 +617,7 @@ public class MainViewController {
     		    continue;
     	    }
 
-            if( p.getUpdate() ) {
+            if( !p.getUpdate() ) {
                 if( log.isDebugEnabled() ) {
                     log.debug("[DO UPDATE] skipping update of p=" + p.getAbsPath() + " because user excluded it from update");
                 }
@@ -583,14 +634,24 @@ public class MainViewController {
                     XPath xpath = XPathFactory.newInstance().newXPath();
                     XPathExpression expression = xpath.compile("//project/parent/version/text()");
                     Node node = (Node) expression.evaluate( doc, XPathConstants.NODE);
-                    node.setNodeValue( tfNewVersion.getText() );
+
+                    if( StringUtils.isNotEmpty(tfNewVersion.getText()) ) {
+                        node.setNodeValue(tfNewVersion.getText());
+                    } else { // editing individual table cells
+                        node.setNodeValue( p.getParentVersion() );
+                    }
                 }
 
                 if( p.getVersion() != null && p.getVersion().length() > 0 ) {
                     XPath xpath = XPathFactory.newInstance().newXPath();
                     XPathExpression expression = xpath.compile("//project/version/text()");
                     Node node = (Node) expression.evaluate(doc, XPathConstants.NODE);
-                    node.setNodeValue( tfNewVersion.getText() );
+
+                    if( StringUtils.isNotEmpty(tfNewVersion.getText()) ) {
+                        node.setNodeValue(tfNewVersion.getText());
+                    } else { // editing individual table cells
+                        node.setNodeValue(p.getVersion());
+                    }
                 }
 
                 TransformerFactory tFactory =
@@ -627,6 +688,8 @@ public class MainViewController {
             }
             tblPOMS.getItems().clear();
         }
+        tblPOMSDirty = false;
+        tfNewVersion.setDisable( false );
     }
 
     @FXML
@@ -749,6 +812,44 @@ public class MainViewController {
         tblPOMS.getItems().
                 stream().
                 forEach(pom -> pom.setUpdate(false ) );
+    }
+
+    @FXML
+    public void handleLockTblPOMS() {
+
+        if (log.isDebugEnabled() ) {
+            log.debug("[HANDLE LOCK]");
+        }
+
+        if( tblPOMSLocked ) {  // unlock operation
+            unlockTblPOMS();
+        } else { // lock operation
+            lockTblPOMS();
+        }
+    }
+
+    private void unlockTblPOMS() {
+        tblPOMSLocked = false;
+
+        tcVersion.setEditable( true );
+        tcParentVersion.setEditable( true );
+
+        btnLockUnlock.setGraphic( lockImageView );
+
+        //
+        // operating in manual mode which ignores the global New Version
+        //
+        tfNewVersion.setText( null );
+        tfNewVersion.setDisable( true );
+    }
+
+    private void lockTblPOMS() {
+        tblPOMSLocked = true;
+
+        tcVersion.setEditable( false );
+        tcParentVersion.setEditable( false );
+
+        btnLockUnlock.setGraphic( unlockImageView );
     }
 }
 

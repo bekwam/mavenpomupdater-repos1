@@ -126,11 +126,11 @@ public class Main extends Application {
 		// load fxml and wire controllers
 		//
     	FXMLLoader mainViewLoader= new FXMLLoader(getClass().getResource("mavenpomupdater.fxml"), null, builderFactory, guiceControllerFactory);
-    	Parent mainView = (Parent)mainViewLoader.load();
+    	Parent mainView = mainViewLoader.load();
     	MainViewController mainViewController = mainViewLoader.getController();
     	
     	FXMLLoader alertViewLoader = new FXMLLoader(getClass().getResource("alert.fxml"), null, builderFactory, guiceControllerFactory);
-    	Parent alertView = (Parent)alertViewLoader.load();
+    	Parent alertView = alertViewLoader.load();
     	
     	//
     	// i'm continuing this manual wiring to 1) accommodate a potential
