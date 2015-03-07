@@ -17,8 +17,10 @@ package com.bekwam.mavenpomupdater;
 
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import javafx.util.converter.DefaultStringConverter;
 
 /**
  * Conditionally displays cell under a warning style if parseError is set
@@ -29,24 +31,40 @@ import javafx.util.Callback;
 public class WarningCellFactory implements Callback<TableColumn<POMObject,String>, TableCell<POMObject,String>>{
 
 	@Override
-	public TableCell<POMObject, String> call(TableColumn<POMObject, String> arg0) {
-		return new TableCell<POMObject, String>() {
-			@Override
-			protected void updateItem(String arg0, boolean empty) {
-				super.updateItem(arg0, empty);
-				if( !empty ) {
-						this.setText( arg0 );
-						POMObject pomObject = (POMObject) this.getTableRow().getItem();
-						if( pomObject != null && pomObject.getParseError() ) {
-							this.setTextFill(Color.RED);
-						} else {
-							this.setTextFill(Color.BLACK);
-						}
-				} else {
-					this.setText( null );  // clear from recycled obj
-					this.setTextFill(Color.BLACK);
-				}
-			}
-		};
+	public TableCell<POMObject, String> call(TableColumn<POMObject, String> col) {
+		return createTableCell(col);
 	}
+
+    private TextFieldTableCell<POMObject, String> createTableCell(TableColumn<POMObject, String> col) {
+
+        /**
+         * Uncomment this to provide a property-based converted for the cell constructor
+         *
+         * PropertyValueFactory<POMObject, String> pvf = (PropertyValueFactory<POMObject, String>)col.getCellValueFactory();
+         */
+
+        TextFieldTableCell<POMObject, String> cell = new TextFieldTableCell<POMObject, String>(new DefaultStringConverter()) {
+            @Override
+            public void updateItem(String arg0, boolean empty) {
+                super.updateItem(arg0, empty);
+                if( !empty ) {
+                    this.setText( arg0 );
+                    POMObject pomObject = (POMObject) this.getTableRow().getItem();
+                    if( pomObject != null && pomObject.getParseError() ) {
+                        this.setTextFill(Color.RED);
+                        this.setEditable( false );
+                    } else {
+                        this.setTextFill(Color.BLACK);
+                        this.setEditable( true );
+                    }
+                } else {
+                    this.setText( null );  // clear from recycled obj
+                    this.setTextFill(Color.BLACK);
+                    this.setEditable( true );
+                }
+            }
+        };
+
+        return cell;
+    }
 }

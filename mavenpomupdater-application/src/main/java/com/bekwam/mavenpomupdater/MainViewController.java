@@ -39,10 +39,12 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -107,6 +109,9 @@ public class MainViewController {
     TableColumn<POMObject, String> tcParentVersion;
 
     @FXML
+    TableColumn<POMObject, Boolean> tcUpdate;
+
+    @FXML
     ImageView aboutImageView;
     
     @FXML
@@ -165,7 +170,19 @@ public class MainViewController {
     
     @FXML
     TableColumn<ErrorLogEntry, String> tcMessage;
-    
+
+    @FXML
+    AnchorPane ap;
+
+    @FXML
+    Button btnSelectAll;
+
+    @FXML
+    Button btnDeselectAll;
+
+    @FXML
+    Button btnLockUnlock;
+
     @Inject
     MenuBarDelegate menuBarDelegate;
     
@@ -191,7 +208,11 @@ public class MainViewController {
     
     private DocumentBuilderFactory factory;    
     private TextField tfRootDir;
-    
+    private Boolean tblPOMSLocked = true;
+    private Boolean tblPOMSDirty = false;
+    private ImageView lockImageView;
+    private ImageView unlockImageView;
+
     public MainViewController() {
     	
     	if( log.isDebugEnabled() ) {
@@ -211,54 +232,14 @@ public class MainViewController {
 
     	vbox.getStyleClass().add("main-view-pane");
 
-        tcPath.setCellValueFactory(
-                new PropertyValueFactory<POMObject, String>("absPath")
-        );
-        tcPath.setCellFactory(new WarningCellFactory());
-        
-        tcVersion.setCellValueFactory(
-                new PropertyValueFactory<POMObject, String>("version")
-        );
-        tcVersion.setCellFactory(new WarningCellFactory());
+        initialTblPOMS();
 
-        tcParentVersion.setCellValueFactory(
-               new PropertyValueFactory<POMObject, String>("parentVersion")
-        );
-        tcParentVersion.setCellFactory(new WarningCellFactory());
-
-        tcTime.setCellValueFactory(
-                new PropertyValueFactory<ErrorLogEntry, String>("logTime")
-        );
-
-        tcFile.setCellValueFactory(
-                new PropertyValueFactory<ErrorLogEntry, String>("fileName")
-        );
-
-        tcMessage.setCellValueFactory(
-                new PropertyValueFactory<ErrorLogEntry, String>("message")
-        );
 
     	Properties appProperties = propertiesFileDAO.getProperties();
     	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
 
-    	Image cutImage = new Image("images/cut32.png");
-    	tbCut.setGraphic(new ImageView(cutImage));
-    	
-    	Image copyImage = new Image("images/copy32.png");
-    	tbCopy.setGraphic(new ImageView(copyImage));
+        initializeButtonGraphics();
 
-    	Image pasteImage = new Image("images/paste32.png");
-    	tbPaste.setGraphic(new ImageView(pasteImage));
-
-    	Image scanImage = new Image("images/scan32.png");
-    	tbScan.setGraphic(new ImageView(scanImage));
-    	
-    	Image updateImage = new Image("images/update32.png");
-    	tbUpdate.setGraphic(new ImageView(updateImage));
-    	
-    	Image clearImage = new Image("images/clear32.png");
-    	tbClear.setGraphic( new ImageView(clearImage));
-    	
     	errorLogTab.setOnSelectionChanged(event -> tbClear.setDisable( !errorLogTab.isSelected() ) );
     	
     	//
@@ -315,7 +296,82 @@ public class MainViewController {
         
         cbRootDir.getItems().addAll( favorites );        
     }
-    
+
+    private void initialTblPOMS() {
+        tcPath.setCellValueFactory(
+                new PropertyValueFactory<POMObject, String>("absPath")
+        );
+        tcPath.setCellFactory(new WarningCellFactory());
+
+        tcVersion.setCellValueFactory(
+                new PropertyValueFactory<POMObject, String>("version")
+        );
+        tcVersion.setCellFactory(new WarningCellFactory());
+        tcVersion.setOnEditCommit(t -> {
+            tblPOMSDirty = true;
+            ((POMObject) t.getTableView().getItems().get(t.getTablePosition().getRow())).setVersion(t.getNewValue());
+        });
+
+        tcParentVersion.setCellValueFactory(
+               new PropertyValueFactory<POMObject, String>("parentVersion")
+        );
+        tcParentVersion.setCellFactory(new WarningCellFactory());
+        tcParentVersion.setOnEditCommit(t -> {
+            tblPOMSDirty = true;
+            ((POMObject) t.getTableView().getItems().get(t.getTablePosition().getRow())).setParentVersion(t.getNewValue());
+        });
+
+        tcUpdate.setCellValueFactory(
+                new PropertyValueFactory<POMObject, Boolean>("update")
+        );
+        tcUpdate.setCellFactory(CheckBoxTableCell.forTableColumn(tcUpdate));
+
+        tcTime.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("logTime")
+        );
+
+        tcFile.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("fileName")
+        );
+
+        tcMessage.setCellValueFactory(
+                new PropertyValueFactory<ErrorLogEntry, String>("message")
+        );
+    }
+
+    private void initializeButtonGraphics() {
+        Image cutImage = new Image("images/cut32.png");
+        tbCut.setGraphic(new ImageView(cutImage));
+
+        Image copyImage = new Image("images/copy32.png");
+        tbCopy.setGraphic(new ImageView(copyImage));
+
+        Image pasteImage = new Image("images/paste32.png");
+        tbPaste.setGraphic(new ImageView(pasteImage));
+
+        Image scanImage = new Image("images/scan32.png");
+        tbScan.setGraphic(new ImageView(scanImage));
+
+        Image updateImage = new Image("images/update32.png");
+        tbUpdate.setGraphic(new ImageView(updateImage));
+
+        Image clearImage = new Image("images/clear32.png");
+        tbClear.setGraphic( new ImageView(clearImage));
+
+        Image selImage = new Image("images/select16.png");
+        btnSelectAll.setGraphic( new ImageView(selImage) );
+
+        Image deselImage = new Image("images/deselect16.png");
+        btnDeselectAll.setGraphic( new ImageView(deselImage ) );
+
+        Image lockImage = new Image("images/lock16.png");
+        lockImageView = new ImageView(lockImage);
+
+        Image unlockImage = new Image("images/unlock16.png");
+        unlockImageView = new ImageView(unlockImage);
+        btnLockUnlock.setGraphic(unlockImageView);
+    }
+
     @FXML
     public void selectFile(ActionEvent evt) {
     	
@@ -345,12 +401,24 @@ public class MainViewController {
         String rootDir = tfRootDir.getText();
 
         if( StringUtils.isEmpty(rootDir) ) {
+
         	if( log.isDebugEnabled() ) {
         		log.debug("[SCAN] rootDir is empty");
         	}
-        	alertController.setNotificationDialog("Project Root Is Empty", "A root directory must be specified in order to scan.");
+
+            alertController.setNotificationDialog("Project Root Is Empty", "A root directory must be specified in order to scan.");
         	vbox.toBack();  // bring up the alert view
-        	return;
+
+            tblPOMS.getItems().clear();
+            btnDeselectAll.setDisable( true );
+            btnSelectAll.setDisable( true );
+
+            lockTblPOMS();
+            btnLockUnlock.setDisable( true );
+
+            tfNewVersion.setDisable( false );
+
+            return;
         }
         
         //
@@ -370,12 +438,24 @@ public class MainViewController {
         gatherPOMPaths( rootDir, pomPaths, ff );
 
         if( CollectionUtils.isEmpty(pomPaths) ) {
-        	if( log.isDebugEnabled() ) {
+
+            if( log.isDebugEnabled() ) {
         		log.debug("[SCAN] pomPaths is empty");
         	}
-        	alertController.setNotificationDialog("No POMs Found", "No pom.xml files were found in the specified Project Root.");
+
+            alertController.setNotificationDialog("No POMs Found", "No pom.xml files were found in the specified Project Root.");
         	vbox.toBack();  // bring up the alert view
-        	return;
+
+            tblPOMS.getItems().clear();
+            btnDeselectAll.setDisable( true );
+            btnSelectAll.setDisable( true );
+
+            lockTblPOMS();
+            btnLockUnlock.setDisable(true);
+
+            tfNewVersion.setDisable( false );
+
+            return;
         }
 
         tblPOMS.getItems().clear();
@@ -383,13 +463,22 @@ public class MainViewController {
             POMObject pomObject = parseFile( path );
             tblPOMS.getItems().add( pomObject );
         }
-        
+
         //
-        // Save rootDir as a favorite (if not done already)
+        // Activate the select and de-select buttons
         //
+        btnDeselectAll.setDisable( false );
+        btnSelectAll.setDisable(false);
+
+        //
+        // Activate the lock/unlock button
+        //
+        lockTblPOMS();  // reset lock state
+        btnLockUnlock.setDisable(false);
+        tblPOMSDirty = false;
+        tfNewVersion.setDisable( false );
     }
 
-    @SuppressWarnings("unused")
 	private POMObject parseFile(String path) {
     	
     	if( log.isDebugEnabled() ) {
@@ -412,7 +501,7 @@ public class MainViewController {
                 }
             }
 
-            XPath pvXPath = XPathFactory.newInstance().newXPath();
+ //           XPath pvXPath = XPathFactory.newInstance().newXPath();
             XPathExpression pvExpression = xpath.compile("//project/parent/version/text()");
             Node pvNode = (Node) pvExpression.evaluate( doc, XPathConstants.NODE );
 
@@ -424,14 +513,14 @@ public class MainViewController {
                 }
             }
 
-            return new POMObject(path, version, pVersion, false);
+            return new POMObject(true, path, version, pVersion, false);
 
         } catch(Exception exc) {
         	log.error( "error parsing path=" + path, exc );
         	
         	errorLogDelegate.log( path, exc.getMessage() );
         	
-            return new POMObject(path, "Parse Error (will be skipped)", "Parse Error (will be skipped)", true);
+            return new POMObject(false, path, "Parse Error (will be skipped)", "Parse Error (will be skipped)", true);
         }
     }
 
@@ -478,21 +567,21 @@ public class MainViewController {
     	}
 
     	String newVersion = tfNewVersion.getText();
-        if( StringUtils.isEmpty(newVersion) ) {
+        if( StringUtils.isEmpty(newVersion) && !tblPOMSDirty ) {
         	if( log.isDebugEnabled() ) {
-        		log.debug("[UPDATE] newVersion is empty");
+        		log.debug("[UPDATE] newVersion is empty and not manually editing the table");
         	}
         	alertController.setNotificationDialog("No Version Specified", "Please specify a version.");
         	vbox.toBack();  // bring up the alert view
         	return;
         }
 
-        int npoms = CollectionUtils.size(tblPOMS.getItems());
-        if( npoms == 0 ) {
+        long npoms = tblPOMS.getItems().stream().filter(p -> p.getUpdate()).count();
+        if( npoms == 0L ) {
         	if( log.isDebugEnabled() ) {
         		log.debug("[UPDATE] tblPOMS is empty");
         	}
-        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowser for a Project Root and press Scan.");
+        	alertController.setNotificationDialog("No POMs Specified", "No poms were specified.\nBrowse for a Project Root, press Scan, and select one or more poms.");
         	vbox.toBack();  // bring up the alert view
         	return;
         } else {
@@ -511,74 +600,93 @@ public class MainViewController {
     }
     
     public void doUpdate() {
+
     	for( POMObject p : tblPOMS.getItems() ) {
 
-    	if( log.isDebugEnabled() ) {
-    		log.debug("[DO UPDATE] p=" + p.getAbsPath());
-    	}
+    	    if( log.isDebugEnabled() ) {
+    		    log.debug("[DO UPDATE] p=" + p.getAbsPath());
+    	    }
 
-    	if( p.getParseError() ) {
-    		if( log.isDebugEnabled() ) {
-    			log.debug("[DO UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
-    		}
-    		continue;
-    	}
-    	
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(p.getAbsPath());
+    	    if( p.getParseError() ) {
+    		    if( log.isDebugEnabled() ) {
+    			    log.debug("[DO UPDATE] skipping update of p=" + p.getAbsPath() + " because of a parse error on scanning");
+    		    }
+    		    continue;
+    	    }
 
-            if( p.getParentVersion() != null && p.getParentVersion().length() > 0 ) {
-                XPath xpath = XPathFactory.newInstance().newXPath();
-                XPathExpression expression = xpath.compile("//project/parent/version/text()");
-                Node node = (Node) expression.evaluate( doc, XPathConstants.NODE);
-                node.setNodeValue( tfNewVersion.getText() );
+            if( !p.getUpdate() ) {
+                if( log.isDebugEnabled() ) {
+                    log.debug("[DO UPDATE] skipping update of p=" + p.getAbsPath() + " because user excluded it from update");
+                }
+                continue;
             }
 
-            if( p.getVersion() != null && p.getVersion().length() > 0 ) {
-                XPath xpath = XPathFactory.newInstance().newXPath();
-                XPathExpression expression = xpath.compile("//project/version/text()");
-                Node node = (Node) expression.evaluate(doc, XPathConstants.NODE);
-                node.setNodeValue( tfNewVersion.getText() );
-            }
+            try {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                factory.setNamespaceAware(false);
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(p.getAbsPath());
 
-            TransformerFactory tFactory =
+                if( p.getParentVersion() != null && p.getParentVersion().length() > 0 ) {
+                    XPath xpath = XPathFactory.newInstance().newXPath();
+                    XPathExpression expression = xpath.compile("//project/parent/version/text()");
+                    Node node = (Node) expression.evaluate( doc, XPathConstants.NODE);
+
+                    if( StringUtils.isNotEmpty(tfNewVersion.getText()) ) {
+                        node.setNodeValue(tfNewVersion.getText());
+                    } else { // editing individual table cells
+                        node.setNodeValue( p.getParentVersion() );
+                    }
+                }
+
+                if( p.getVersion() != null && p.getVersion().length() > 0 ) {
+                    XPath xpath = XPathFactory.newInstance().newXPath();
+                    XPathExpression expression = xpath.compile("//project/version/text()");
+                    Node node = (Node) expression.evaluate(doc, XPathConstants.NODE);
+
+                    if( StringUtils.isNotEmpty(tfNewVersion.getText()) ) {
+                        node.setNodeValue(tfNewVersion.getText());
+                    } else { // editing individual table cells
+                        node.setNodeValue(p.getVersion());
+                    }
+                }
+
+                TransformerFactory tFactory =
                     TransformerFactory.newInstance();
-            Transformer transformer = tFactory.newTransformer();
+                Transformer transformer = tFactory.newTransformer();
 
-            String workingFileName = p.getAbsPath() + ".mpu";
-            FileWriter fw = new FileWriter(workingFileName);
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(fw);
-            transformer.transform(source, result);
-            fw.close();
+                String workingFileName = p.getAbsPath() + ".mpu";
+                FileWriter fw = new FileWriter(workingFileName);
+                DOMSource source = new DOMSource(doc);
+                StreamResult result = new StreamResult(fw);
+                transformer.transform(source, result);
+                fw.close();
 
-            Path src = FileSystems.getDefault().getPath( workingFileName );
-            Path target = FileSystems.getDefault().getPath( p.getAbsPath() );
+                Path src = FileSystems.getDefault().getPath( workingFileName );
+                Path target = FileSystems.getDefault().getPath( p.getAbsPath() );
 
-            Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
 
-            Files.delete( src );
+                Files.delete( src );
 
-        } catch(Exception exc) {
-        	log.error( "error updating poms", exc );
+            } catch(Exception exc) {
+                log.error( "error updating poms", exc );
+            }
         }
-    }
     
-    if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
-    	if( log.isDebugEnabled() ) {
-    		log.debug("[DO UPDATE] issuing rescan command");
-    	}
-    	scan();
-    } else {
-    	if( log.isDebugEnabled() ) {
-    		log.debug("[DO UPDATE] did an update, but there is not value in root; clearing");
-    	}
-    	tblPOMS.getItems().clear();
-    } 
-
+        if( StringUtils.isNotEmpty(tfRootDir.getText()) ) {
+            if( log.isDebugEnabled() ) {
+    		    log.debug("[DO UPDATE] issuing rescan command");
+            }
+            scan();
+        } else {
+    	    if( log.isDebugEnabled() ) {
+    		    log.debug("[DO UPDATE] did an update, but there is not value in root; clearing");
+            }
+            tblPOMS.getItems().clear();
+        }
+        tblPOMSDirty = false;
+        tfNewVersion.setDisable( false );
     }
 
     @FXML
@@ -677,6 +785,68 @@ public class MainViewController {
     @FXML
     public void clearErrorLog() {
     	errorLogDelegate.clearTable();
+    }
+
+    @FXML
+    public void selectAllTblPOMS() {
+
+        if( log.isDebugEnabled() ) {
+            log.debug("[SELECT ALL]");
+        }
+        tblPOMS.getItems().
+                stream().
+                filter( pom -> !pom.getParseError()).
+                forEach( pom -> pom.setUpdate(true) );
+    }
+
+    @FXML
+    public void deSelectAllTblPOMS() {
+
+        if( log.isDebugEnabled() ) {
+            log.debug("[DESELECT ALL]");
+        }
+
+        tblPOMS.getItems().
+                stream().
+                forEach(pom -> pom.setUpdate(false ) );
+    }
+
+    @FXML
+    public void handleLockTblPOMS() {
+
+        if (log.isDebugEnabled() ) {
+            log.debug("[HANDLE LOCK]");
+        }
+
+        if( tblPOMSLocked ) {  // unlock operation
+            unlockTblPOMS();
+        } else { // lock operation
+            lockTblPOMS();
+        }
+    }
+
+    private void unlockTblPOMS() {
+        tblPOMSLocked = false;
+
+        tcVersion.setEditable( true );
+        tcParentVersion.setEditable( true );
+
+        btnLockUnlock.setGraphic( lockImageView );
+
+        //
+        // operating in manual mode which ignores the global New Version
+        //
+        tfNewVersion.setText( null );
+        tfNewVersion.setDisable( true );
+    }
+
+    private void lockTblPOMS() {
+        tblPOMSLocked = true;
+
+        tcVersion.setEditable( false );
+        tcParentVersion.setEditable( false );
+
+        btnLockUnlock.setGraphic( unlockImageView );
     }
 }
 

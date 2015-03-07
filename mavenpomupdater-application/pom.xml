@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.bekwam</groupId>
 	<artifactId>mavenpomupdater</artifactId>
-	<version>1.2.0</version>
+	<version>1.3.0</version>
 
 	<dependencies>
 		<dependency>
@@ -168,9 +168,27 @@
 					<storepass>${storepass}</storepass>
 					<keypass>${keypass}</keypass>
 					<verbose>${verbose}</verbose>
+                    <arguments>
+                        <argument>-tsa</argument>
+                        <argument>http://timestamp.digicert.com</argument>
+                    </arguments>
 				</configuration>
 			</plugin>
-		</plugins>
+        </plugins>
+        <resources>
+            <resource>
+                <targetPath>com/bekwam/mavenpomupdater</targetPath>
+                <directory>src/main/java/com/bekwam/mavenpomupdater</directory>
+                <includes>
+                    <include>*.fxml</include>
+                    <include>*.css</include>
+                    <include>*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
 	</build>
 
 </project>
