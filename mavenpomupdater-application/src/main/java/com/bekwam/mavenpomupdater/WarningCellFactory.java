@@ -17,17 +17,10 @@ package com.bekwam.mavenpomupdater;
 
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 import javafx.util.converter.DefaultStringConverter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.lang.reflect.Method;
 
 /**
  * Conditionally displays cell under a warning style if parseError is set
@@ -36,8 +29,6 @@ import java.lang.reflect.Method;
  * @since 1.0.0
  */
 public class WarningCellFactory implements Callback<TableColumn<POMObject,String>, TableCell<POMObject,String>>{
-
-    private Log log = LogFactory.getLog(WarningCellFactory.class);
 
 	@Override
 	public TableCell<POMObject, String> call(TableColumn<POMObject, String> col) {

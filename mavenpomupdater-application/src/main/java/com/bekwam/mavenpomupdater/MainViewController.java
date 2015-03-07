@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Properties;
 
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
@@ -42,13 +41,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
@@ -504,7 +501,7 @@ public class MainViewController {
                 }
             }
 
-            XPath pvXPath = XPathFactory.newInstance().newXPath();
+ //           XPath pvXPath = XPathFactory.newInstance().newXPath();
             XPathExpression pvExpression = xpath.compile("//project/parent/version/text()");
             Node pvNode = (Node) pvExpression.evaluate( doc, XPathConstants.NODE );
 
