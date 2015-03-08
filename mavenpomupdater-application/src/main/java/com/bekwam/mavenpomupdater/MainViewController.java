@@ -232,24 +232,29 @@ public class MainViewController {
 
     	vbox.getStyleClass().add("main-view-pane");
 
-        initialTblPOMS();
-
-
-    	Properties appProperties = propertiesFileDAO.getProperties();
-    	String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
-
+        initializeTblPOMS();
         initializeButtonGraphics();
+        initializeDelegates();
 
-    	errorLogTab.setOnSelectionChanged(event -> tbClear.setDisable( !errorLogTab.isSelected() ) );
-    	
-    	//
-    	// tfRootDir comes from a ComboBox that isn't readily accessible
-    	//
-    	
-    	tfRootDir = cbRootDir.editorProperty().get();
-    	tfRootDir.setOnMouseReleased( event -> { toolBarMouseReleased(event); });
-    	
-    	//
+        errorLogTab.setOnSelectionChanged(event -> tbClear.setDisable( !errorLogTab.isSelected() ) );
+
+        List<String> favorites = favoritesDAO.findAllFavoriteRootDirs();
+        
+        cbRootDir.getItems().addAll( favorites );        
+    }
+
+    private void initializeDelegates() {
+        Properties appProperties = propertiesFileDAO.getProperties();
+        String version = appProperties.getProperty(AppPropertiesKeys.VERSION);
+
+        //
+        // tfRootDir comes from a ComboBox that isn't readily accessible
+        //
+
+        tfRootDir = cbRootDir.editorProperty().get();
+        tfRootDir.setOnMouseReleased( event -> { toolBarMouseReleased(event); });
+
+        //
         // wire up delegates
         //
         aboutDelegate.imageView = aboutImageView;
@@ -257,7 +262,7 @@ public class MainViewController {
         aboutDelegate.aboutTab = aboutTab;
         aboutDelegate.version = version;
         aboutDelegate.aboutVersionLabel = aboutVersionLabel;
-        
+
         menuBarDelegate.tabPane = tabPane;
         menuBarDelegate.homeTab = homeTab;
         menuBarDelegate.aboutTab = aboutTab;
@@ -270,7 +275,7 @@ public class MainViewController {
         menuBarDelegate.tfFilters = tfFilters;
         menuBarDelegate.tfNewVersion = tfNewVersion;
         menuBarDelegate.tfRootDir = tfRootDir;
-        
+
         toolBarDelegate.tbCut = tbCut;
         toolBarDelegate.tbCopy = tbCopy;
         toolBarDelegate.tbPaste = tbPaste;
@@ -282,22 +287,18 @@ public class MainViewController {
         errorLogDelegate.errorLogTab = errorLogTab;
         errorLogDelegate.tblErrors = tblErrors;
         errorLogDelegate.miErrorLog = miErrorLog;
-        
+
         //
         // initialize delegates
         //
         aboutDelegate.init();
         toolBarDelegate.init();
         errorLogDelegate.init();
-        
+
         favoritesDAO.init();
-        
-        List<String> favorites = favoritesDAO.findAllFavoriteRootDirs();
-        
-        cbRootDir.getItems().addAll( favorites );        
     }
 
-    private void initialTblPOMS() {
+    private void initializeTblPOMS() {
         tcPath.setCellValueFactory(
                 new PropertyValueFactory<POMObject, String>("absPath")
         );
