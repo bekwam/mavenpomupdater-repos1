@@ -847,6 +847,8 @@ public class MainViewController {
         tcParentVersion.setEditable( false );
 
         btnLockUnlock.setGraphic( unlockImageView );
+
+        tfNewVersion.setDisable( false );
     }
 }
 
