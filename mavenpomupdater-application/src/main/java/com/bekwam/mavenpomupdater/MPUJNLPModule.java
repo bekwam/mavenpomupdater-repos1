@@ -17,6 +17,8 @@ package com.bekwam.mavenpomupdater;
 
 import com.bekwam.mavenpomupdater.data.FavoritesDAO;
 import com.bekwam.mavenpomupdater.data.FavoritesJNLPPersistenceServiceDAO;
+import com.bekwam.mavenpomupdater.data.PreferencesDAO;
+import com.bekwam.mavenpomupdater.data.PreferencesJNLPPersistenceServiceDAO;
 import com.google.inject.AbstractModule;
 
 public class MPUJNLPModule extends AbstractModule {
@@ -24,6 +26,7 @@ public class MPUJNLPModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(FavoritesDAO.class).to(FavoritesJNLPPersistenceServiceDAO.class).asEagerSingleton();
+        bind(PreferencesDAO.class).to(PreferencesJNLPPersistenceServiceDAO.class).asEagerSingleton();
 	}
 
 }

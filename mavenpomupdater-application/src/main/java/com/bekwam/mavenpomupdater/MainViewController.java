@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.bekwam.mavenpomupdater.data.PreferencesConstants;
+import com.bekwam.mavenpomupdater.data.PreferencesDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -183,6 +185,9 @@ public class MainViewController {
     @FXML
     Button btnLockUnlock;
 
+    @FXML
+    Tab preferencesTab;
+
     @Inject
     MenuBarDelegate menuBarDelegate;
     
@@ -195,6 +200,9 @@ public class MainViewController {
     @Inject
     ErrorLogDelegate errorLogDelegate;
 
+    @Inject
+    PreferencesDelegate preferencesDelegate;
+
     //
     // will be manually wired
     //
@@ -205,7 +213,10 @@ public class MainViewController {
     
     @Inject
     PropertiesFileDAO propertiesFileDAO;
-    
+
+    @Inject
+    PreferencesDAO preferencesDAO;
+
     private DocumentBuilderFactory factory;    
     private TextField tfRootDir;
     private Boolean tblPOMSLocked = true;
@@ -267,6 +278,7 @@ public class MainViewController {
         menuBarDelegate.homeTab = homeTab;
         menuBarDelegate.aboutTab = aboutTab;
         menuBarDelegate.errorLogTab = errorLogTab;
+        menuBarDelegate.preferencesTab = preferencesTab;
         menuBarDelegate.supportURL = appProperties.getProperty(AppPropertiesKeys.SUPPORT_URL);
         menuBarDelegate.licenseURL = appProperties.getProperty(AppPropertiesKeys.LICENSE_URL);
         menuBarDelegate.miCut = miCut;
@@ -275,6 +287,7 @@ public class MainViewController {
         menuBarDelegate.tfFilters = tfFilters;
         menuBarDelegate.tfNewVersion = tfNewVersion;
         menuBarDelegate.tfRootDir = tfRootDir;
+        menuBarDelegate.preferencesDelegate = preferencesDelegate;
 
         toolBarDelegate.tbCut = tbCut;
         toolBarDelegate.tbCopy = tbCopy;
@@ -288,14 +301,20 @@ public class MainViewController {
         errorLogDelegate.tblErrors = tblErrors;
         errorLogDelegate.miErrorLog = miErrorLog;
 
+        preferencesDelegate.tabPane = tabPane;
+        preferencesDelegate.preferencesTab = preferencesTab;
+        preferencesDelegate.tfFilters = tfFilters;
+
         //
         // initialize delegates
         //
         aboutDelegate.init();
         toolBarDelegate.init();
         errorLogDelegate.init();
+        preferencesDelegate.init();
 
         favoritesDAO.init();
+        preferencesDAO.init();
     }
 
     private void initializeTblPOMS() {
@@ -431,7 +450,7 @@ public class MainViewController {
         	cbRootDir.getItems().add(rootDir);
         }
         
-        String filtersCSV = tfFilters.getText();
+        String filtersCSV = preferencesDelegate.getProperty(PreferencesConstants.KEY_FILTERS);
 
         CSVFilenameFilter ff = new CSVFilenameFilter(filtersCSV);
 
@@ -699,7 +718,10 @@ public class MainViewController {
     public void showAbout() {
     	menuBarDelegate.showAbout();
     }
-    
+
+    @FXML
+    public void showPreferences() { menuBarDelegate.showPreferences(); }
+
     @FXML
     public void showOrHideErrorLog(ActionEvent evt) {
     	CheckMenuItem mi = (CheckMenuItem)evt.getSource();
@@ -787,6 +809,12 @@ public class MainViewController {
     public void clearErrorLog() {
     	errorLogDelegate.clearTable();
     }
+
+    @FXML
+    public void savePreferences() { preferencesDelegate.savePreferences(); }
+
+    @FXML
+    public void revertPreferences() { preferencesDelegate.show(); }
 
     @FXML
     public void selectAllTblPOMS() {

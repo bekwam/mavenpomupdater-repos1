@@ -33,6 +33,8 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
+                  <MenuItem mnemonicParsing="false" onAction="#showPreferences" text="Preferences" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem mnemonicParsing="false" onAction="#close" text="Close" />
             </items>
           </Menu>
@@ -86,7 +88,6 @@
                                 <rowConstraints>
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints />
                                     <RowConstraints />
                                     <RowConstraints />
@@ -110,18 +111,22 @@
                                           <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                        </GridPane.margin>
                                     </ComboBox>
-                                    <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2" />
-                                    <TextField fx:id="tfFilters" onMouseReleased="#toolBarMouseReleased" prefWidth="626.0" text="target" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                       <tooltip>
-                                          <Tooltip text="Comma-separated list of filter strings" />
-                                       </tooltip>
-                                       <GridPane.margin>
-                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                       </GridPane.margin>
-                                    </TextField>
-                                    <Label text="Filters" GridPane.rowIndex="1" />
-                                    <Label text="New Version" GridPane.rowIndex="2" />
-                                    <TextField fx:id="tfNewVersion" onMouseReleased="#toolBarMouseReleased" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <HBox GridPane.columnIndex="2">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#selectFile" text="Browse" GridPane.columnIndex="2">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                          </Button>
+                                          <Button mnemonicParsing="false" onAction="#scan" text="Scan">
+                                             <HBox.margin>
+                                                <Insets left="4.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                       </children>
+                                    </HBox>
+                                    <Label text="New Version" GridPane.rowIndex="1" />
+                                    <TextField fx:id="tfNewVersion" onMouseReleased="#toolBarMouseReleased" prefWidth="622.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <tooltip>
                                           <Tooltip text="Value to update POM parent version and version" />
                                        </tooltip>
@@ -129,8 +134,7 @@
                                           <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                        </GridPane.margin>
                                     </TextField>
-                                    <Button mnemonicParsing="false" onAction="#update" text="Update" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                    <Button mnemonicParsing="false" onAction="#scan" text="Scan" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                    <Button mnemonicParsing="false" onAction="#update" text="Update" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                  </children>
                               </GridPane>
                               <GridPane>
@@ -221,6 +225,52 @@
                               <Insets bottom="20.0" left="20.0" />
                            </padding>
                         </Label>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab fx:id="preferencesTab" text="Preferences">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <GridPane layoutX="43.0" layoutY="59.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="101.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="964.0" minWidth="10.0" prefWidth="679.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="964.0" minWidth="10.0" prefWidth="129.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Filters" />
+                              <TextField fx:id="tfFilters" prefHeight="25.0" prefWidth="356.0" text="target" GridPane.columnIndex="1">
+                                 <tooltip>
+                                    <Tooltip text="A comma-separated list of filters to limit items in a Scan" />
+                                 </tooltip>
+                              </TextField>
+                              <HBox GridPane.columnIndex="2">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#savePreferences" text="Save" GridPane.columnIndex="2">
+                                       <tooltip>
+                                          <Tooltip text="Save all preferences" />
+                                       </tooltip>
+                                       <HBox.margin>
+                                          <Insets left="4.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#revertPreferences" text="Revert">
+                                       <tooltip>
+                                          <Tooltip text="Revert to last saved preferences" />
+                                       </tooltip>
+                                       <HBox.margin>
+                                          <Insets left="4.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </GridPane>
                      </children>
                   </AnchorPane>
               </content>

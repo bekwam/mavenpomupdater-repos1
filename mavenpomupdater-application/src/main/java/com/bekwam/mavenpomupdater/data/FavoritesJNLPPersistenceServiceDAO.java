@@ -138,7 +138,7 @@ public class FavoritesJNLPPersistenceServiceDAO implements FavoritesDAO {
         			log.debug("[ADD FAV] saving csv=" + favoritesCSV);
         		}
         		
-        		ioUtils.setProperties(fc, KEY_FAVORITES_CSV, favoritesCSV, "jnlp muffins from mpu app");
+        		ioUtils.setProperty(fc, KEY_FAVORITES_CSV, favoritesCSV, "jnlp muffins from mpu app");
 
 	        } catch (Exception exc) { 
 	        	log.error( "error writing muffin", exc);

@@ -47,7 +47,7 @@ public class IOUtils {
     	return properties;
 	}
 	
-	public void setProperties(FileContents fc, String key, String value, String comment) 
+	public void setProperty(FileContents fc, String key, String value, String comment)
 			throws IOException {
 		
         OutputStream os = null;
@@ -66,4 +66,22 @@ public class IOUtils {
     		}
     	}
 	}
+
+    public void setProperties(FileContents fc, Properties properties, String comment)
+            throws IOException {
+
+        OutputStream os = null;
+        try {
+            os = fc.getOutputStream(true);  // true -> overwrite
+            properties.store( os, comment );
+        } finally {
+            try {
+                if( os != null ) {
+                    os.close();
+                }
+            } catch(IOException exc) {
+                log.warn("can't close output stream", exc);
+            }
+        }
+    }
 }

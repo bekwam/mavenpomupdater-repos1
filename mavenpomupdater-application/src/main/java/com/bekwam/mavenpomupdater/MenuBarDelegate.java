@@ -43,11 +43,13 @@ public class MenuBarDelegate {
 	Tab homeTab;
 	Tab aboutTab;
 	Tab errorLogTab;
+    Tab preferencesTab;
 	String supportURL;
 	String licenseURL;
 	MenuItem miCut, miCopy, miPaste;
 	Clipboard systemClipboard;
 	TextField tfRootDir, tfFilters, tfNewVersion;
+    PreferencesDelegate preferencesDelegate;
 
 	public void close() {
 		
@@ -245,4 +247,19 @@ public class MenuBarDelegate {
 		}
 		return null;		
 	}
+
+    public void showPreferences() {
+
+        if( log.isDebugEnabled() ) {
+            log.debug("[SHOW PREFERENCES]");
+        }
+
+        if( !tabPane.getTabs().contains( preferencesTab ) ) {
+            tabPane.getTabs().add( preferencesTab );
+        }
+
+        preferencesDelegate.show();
+
+        tabPane.getSelectionModel().select(preferencesTab);
+    }
 }

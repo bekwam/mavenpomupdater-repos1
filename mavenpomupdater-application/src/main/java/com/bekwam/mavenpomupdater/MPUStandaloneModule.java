@@ -17,13 +17,17 @@ package com.bekwam.mavenpomupdater;
 
 import com.bekwam.mavenpomupdater.data.FavoritesDAO;
 import com.bekwam.mavenpomupdater.data.FavoritesMemoryDAO;
+import com.bekwam.mavenpomupdater.data.PreferencesDAO;
+import com.bekwam.mavenpomupdater.data.PreferencesMemoryDAO;
 import com.google.inject.AbstractModule;
 
 public class MPUStandaloneModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(FavoritesDAO.class).to(FavoritesMemoryDAO.class).asEagerSingleton();
+
+        bind(FavoritesDAO.class).to(FavoritesMemoryDAO.class).asEagerSingleton();
+        bind(PreferencesDAO.class).to(PreferencesMemoryDAO.class).asEagerSingleton();
 	}
 
 }

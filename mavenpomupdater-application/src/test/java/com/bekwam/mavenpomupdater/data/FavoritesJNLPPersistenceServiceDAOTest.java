@@ -67,7 +67,7 @@ public class FavoritesJNLPPersistenceServiceDAOTest {
 			oneOf(ps).getNames( codebase ); will(returnValue(names));
 			oneOf(ps).get( codebase ); will(returnValue(fc));
 			oneOf(ioUtils).getProperties(fc); will(returnValue(properties));
-			oneOf(ioUtils).setProperties(fc, "favoritesCSV", favorite, "jnlp muffins from mpu app");
+			oneOf(ioUtils).setProperty(fc, "favoritesCSV", favorite, "jnlp muffins from mpu app");
 		}});
 		
 		dao.addFavoriteRootDir( favorite );

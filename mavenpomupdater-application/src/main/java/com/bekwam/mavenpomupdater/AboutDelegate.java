@@ -51,9 +51,7 @@ public class AboutDelegate {
 		Image image = new Image("images/mpu_about.jpg");
 		imageView.setImage( image );
 		
-		aboutTab.setOnCloseRequest(new EventHandler<Event>() {
-			@Override
-			public void handle(Event arg0) {
+		aboutTab.setOnCloseRequest(evt -> {
 				if( log.isDebugEnabled() ) {
 					log.debug("[ABOUT CLOSED]");
 				}
@@ -64,8 +62,7 @@ public class AboutDelegate {
 			
 				// needs alt selection here too?
 				
-				arg0.consume();
-			}	
+				evt.consume();
 		});
 		
 		aboutVersionLabel.setText( version );
