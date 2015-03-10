@@ -15,8 +15,6 @@
  */
 package com.bekwam.mavenpomupdater;
 
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;

@@ -1,19 +1,18 @@
 package com.bekwam.mavenpomupdater;
 
-import com.bekwam.mavenpomupdater.data.PreferencesConstants;
-import com.bekwam.mavenpomupdater.data.PreferencesDAO;
-import com.google.inject.Inject;
-import javafx.event.Event;
-import javafx.event.EventHandler;
+import java.util.Map;
+
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Map;
+import com.bekwam.mavenpomupdater.data.PreferencesConstants;
+import com.bekwam.mavenpomupdater.data.PreferencesDAO;
+import com.google.inject.Inject;
 
 /**
  * Created by carl_000 on 3/9/2015.
